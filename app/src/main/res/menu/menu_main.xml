@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/MenuMainSettings" android:title="@string/ActionSettings"/>
+    <item android:id="@+id/MenuMainFeeds" android:title="@string/MenuMainFeeds"/>
+    <item android:id="@+id/MenuMainShowAll" android:title="@string/MenuMainShowAll"/>
+</menu>

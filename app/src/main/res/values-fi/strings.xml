@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ErrorRSSCollectionNoKey">RSSCollection ei sisällä avainta:</string>
+    <string name="ErrorGlobalStringID">Ei ole string id:tä:</string>
+    <string name="DialogRSSAddButtonAddText">Lisää</string>
+    <string name="DialogRSSAddEditTextUrlHint">Url osoite RSS-syötteelle.</string>
+    <string name="DialogRSSAddDownloadAll">Kaikki</string>
+    <string name="DialogRSSAddDownloadNew">Uudet</string>
+    <string name="DialogRSSAddDownload">Lataa Syötteen Media</string>
+    <string name="DialogRSSAddTitle">Lisää RSS-syöte</string>
+    <string name="AppName">Rasian</string>
+    <string name="ActivityMainTitle">Rasian</string>
+    <string name="ActionSettings">Asetukset</string>
+    <string name="title_activity_settings">Asetukset</string>
+    <string name="MenuMainFeeds">Syötteet</string>
+    <string name="RowButtonDownload">Lataa</string>
+    <string name="RowButtonDelete">Poista</string>
+    <string name="ActivitySettingsDelayUnit">tuntia</string>
+    <string name="ActivitySettingsDelayTitle">Synkronointiväli</string>
+    <string name="Save">Tallenna</string>
+    <string name="ErrorNoContext">Kontekstiä ei ole asetettu.</string>
+    <string name="ToastSaveSuccessful">Tallennettu!</string>
+    <string name="ToastSaveFailed">Tallennus Epäonnistui!</string>
+    <string name="ToastAddSuccessful">Lisätty!</string>
+    <string name="ToastAddFailed">Lisäys Epäonnistui!</string>
+    <string name="title_activity_feeds">Syötteet</string>
+    <string name="MenuMainShowAll">Näytä kaikki</string>
+    <string name="ActivitySettingsLimitTitle">Näytä otsikoita</string>
+    <string name="ActivitySettingsLimitUnit">kpl</string>
+    <string name="ActivitySettingNextUpdate"><![CDATA[Seuraava päivitys: ]]></string>
+    <string name="Failed_End"><![CDATA[ epäonnistui!]]></string>
+    <string name="UpdateFailed_End"><![CDATA[ päivitys epäonnistui!]]></string>
+    <string name="Feed_Start"><![CDATA[Syötteen ]]></string>
+    <string name="Removed_End"><![CDATA[ poistettu!]]></string>
+    <string name="IsAlreadyRemoved_End"><![CDATA[ on jo poistettu!]]></string>
+    <string name="LoadFailed">Lataus epäonnistui!</string>
+    <string name="UpdateFailed">Päivitys epäonnistui!</string>
+    <string name="AddedEnd"><![CDATA[ lisätty!]]></string>
+    <string name="Removing_Start"><![CDATA[Poistaminen ]]></string>
+    <string name="Adding_Start"><![CDATA[Lisäys ]]></string>
+</resources>

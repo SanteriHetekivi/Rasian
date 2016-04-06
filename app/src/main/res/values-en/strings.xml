@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ErrorRSSCollectionNoKey">RSSCollection doesn\'t contain key:</string>
+    <string name="ErrorGlobalStringID">There is no string id</string>
+    <string name="DialogRSSAddButtonAddText">Add</string>
+    <string name="DialogRSSAddEditTextUrlHint">Url address for RSS feed.</string>
+    <string name="DialogRSSAddDownloadAll">All</string>
+    <string name="DialogRSSAddDownloadNew">New</string>
+    <string name="DialogRSSAddDownload">Download Feed\'s Media</string>
+    <string name="DialogRSSAddTitle">Add RSS Feed</string>
+    <string name="AppName">Rasian</string>
+    <string name="ActivityMainTitle">Rasian</string>
+    <string name="ActionSettings">Settings</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="MenuMainFeeds">Feeds</string>
+    <string name="RowButtonDownload">Download</string>
+    <string name="RowButtonDelete">Delete</string>
+    <string name="ActivitySettingsDelayUnit">hours</string>
+    <string name="ActivitySettingsDelayTitle">Sync Frequency</string>
+    <string name="Save">Save</string>
+    <string name="ErrorNoContext">Context not set!</string>
+    <string name="ToastSaveSuccessful">Saved!</string>
+    <string name="ToastSaveFailed">Saving Failed!</string>
+    <string name="ToastAddSuccessful">Added!</string>
+    <string name="ToastAddFailed">Add Failed!</string>
+    <string name="title_activity_feeds">Feeds</string>
+    <string name="MenuMainShowAll">Show all</string>
+    <string name="ActivitySettingsLimitTitle">Show items</string>
+    <string name="ActivitySettingsLimitUnit">kpl</string>
+    <string name="ActivitySettingNextUpdate"><![CDATA[Next update: ]]></string>
+    <string name="Failed_End"><![CDATA[ failed!]]></string>
+    <string name="UpdateFailed_End"><![CDATA[ update failed!]]></string>
+    <string name="Feed_Start"><![CDATA[Feed ]]></string>
+    <string name="Removed_End"><![CDATA[ removed!]]></string>
+    <string name="IsAlreadyRemoved_End"><![CDATA[ is already removed!]]></string>
+    <string name="UpdateFailed">Update failed!</string>
+    <string name="LoadFailed">Load failed</string>
+    <string name="AddedEnd"><![CDATA[ added!]]></string>
+    <string name="Removing_Start"><![CDATA[Removing ]]></string>
+    <string name="Adding_Start"><![CDATA[Adding ]]></string>
+</resources>

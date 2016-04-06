@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:showIn="@layout/activity_main"
+        tools:context=".Activities.MainActivity"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+>
+        <ProgressBar
+                android:id="@+id/ActivityMainLoading"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:progressDrawable="@drawable/circular_progress_bar"
+                style="?android:attr/progressBarStyleLarge"
+        />
+        <android.support.v4.widget.SwipeRefreshLayout
+                android:layout_width="match_parent"
+                android:id="@+id/ActivityMainSwipeRefreshLayout"
+                android:layout_height="wrap_content"
+        >
+                <ScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/ActivityMainScrollView"
+                >
+
+                        <TableLayout
+                                android:id="@+id/ActivityMainTable"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                        />
+                </ScrollView>
+        </android.support.v4.widget.SwipeRefreshLayout>
+</RelativeLayout>
+

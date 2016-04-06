@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/rowPadding"
+        android:id="@+id/RowMain"
+        android:background="@drawable/row_border"
+>
+        <TextView
+                android:id="@+id/RowMainTextView"
+                android:textColor="@color/colorAccent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="sasdaasdasdasdsaadsadsasdasdasddsaadssdsadadsdsaasddsadasaaasddasasdd"
+                android:textSize="20sp"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_toLeftOf="@+id/RowMainButton"
+                android:layout_toStartOf="@+id/RowMainButton"
+                android:layout_centerVertical="true"/>
+        <Button
+                android:id="@+id/RowMainButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:text="@string/RowButtonDownload"
+                android:background="@color/colorAccent"
+        />
+</RelativeLayout>

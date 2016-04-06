@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/rowPadding"
+        android:id="@+id/RowFeeds"
+        android:background="@drawable/row_border"
+>
+    <TextView
+            android:id="@+id/RowFeedsTextView"
+            android:textColor="@color/colorAccent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="sasdaasdasdasdsaadsadsasdasdasddsaadssdsadadsdsaasddsadasaaasddasasdd"
+            android:textSize="20sp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_toLeftOf="@+id/RowFeedsButton"
+            android:layout_toStartOf="@+id/RowFeedsButton"
+    />
+
+
+    <Button
+            android:id="@+id/RowFeedsButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/RowButtonDelete"
+            android:background="@color/colorAccent"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignBottom="@+id/RowFeedsTextView"
+            android:layout_alignParentTop="true"
+    />
+    <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/RowFeedsDownload"
+            android:textSize="20sp"
+            android:textColor="@color/colorAccent"
+            android:text="@string/RowButtonDownload"
+            android:layout_below="@+id/RowFeedsTextView"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+    />
+</RelativeLayout>
