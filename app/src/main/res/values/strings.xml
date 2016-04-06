@@ -37,4 +37,5 @@
     <string name="AddedEnd"><![CDATA[ added!]]></string>
     <string name="Removing_Start"><![CDATA[Removing ]]></string>
     <string name="Adding_Start"><![CDATA[Adding ]]></string>
+    <string name="Saving_Start"><![CDATA[Saving ]]></string>
 </resources>

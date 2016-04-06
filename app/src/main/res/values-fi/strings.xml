@@ -38,4 +38,5 @@
     <string name="AddedEnd"><![CDATA[ lisätty!]]></string>
     <string name="Removing_Start"><![CDATA[Poistaminen ]]></string>
     <string name="Adding_Start"><![CDATA[Lisäys ]]></string>
+    <string name="Saving_Start"><![CDATA[Tallennus ]]></string>
 </resources>

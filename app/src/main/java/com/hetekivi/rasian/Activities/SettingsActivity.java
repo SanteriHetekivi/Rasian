@@ -10,29 +10,47 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.*;
 import com.hetekivi.rasian.Data.Global;
-import com.hetekivi.rasian.Data.RSS.RSSCollection;
+import com.hetekivi.rasian.Data.RSS.FeedCollection;
+import com.hetekivi.rasian.Interfaces.Storable;
 import com.hetekivi.rasian.R;
+import com.hetekivi.rasian.Tasks.LoadTask;
+import com.hetekivi.rasian.Tasks.SaveTask;
 import com.hetekivi.rasian.Tasks.UpdateTask;
 import org.joda.time.DateTime;
 
 import static com.hetekivi.rasian.Data.Global.*;
 
-public class SettingsActivity extends AppCompatActivity {
+/**
+ * Activity Settings
+ * for managing settings.
+ */
+public class SettingsActivity extends AppCompatActivity implements Storable {
 
+    private static final String TAG = "SettingsActivity";
+    public static Context context;
+
+    /**
+     * Activity's own UI elements.
+     */
     private EditText delay;
     private EditText limit;
     private Toolbar toolbar;
     private TextView nextUpdate;
     private Button save;
 
-    public static Context context;
 
+    /**
+     * Background colors for fields.
+     */
     private int colorDefault;
     private int colorError;
 
-    private final String KEY_DELAY = RSSCollection.PREFERENCES_START + "delayHours";
-    private final String KEY_LIMIT = Global.ROW_LIMIT_KEY;
 
+    /**
+     * Function onCreate
+     * gets called when activity is created.
+     * @param savedInstanceState Bundle containing saved instance state.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,6 +61,10 @@ public class SettingsActivity extends AppCompatActivity {
         this.UIMake();
     }
 
+    /**
+     * Function firstTime
+     * gets run on first time when app starts.
+     */
     @Override
     protected void onResume()
     {
@@ -94,9 +116,7 @@ public class SettingsActivity extends AppCompatActivity {
      */
     private void UIMakeSetValues()
     {
-        this.delay.setText(String.valueOf(Preference.Get(this.KEY_DELAY, 24)));
-        this.limit.setText(String.valueOf(Preference.Get(this.KEY_LIMIT, 10)));
-        makeNextUpdate();
+        new LoadTask(this).execute();
     }
 
     /**
@@ -115,45 +135,58 @@ public class SettingsActivity extends AppCompatActivity {
         this.save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                SaveAll();
+                onSaveClick();
             }
         });
 
     }
 
-    private void makeNextUpdate()
+    /**
+     * Function onSaveClick
+     * that gets called when save button was pressed.
+     */
+    private void onSaveClick()
+    {
+        new SaveTask(this).execute();
+    }
+
+    /**
+     * Function getNextUpdate
+     * for getting text for nextUpdate field.
+     * @return Formatted text for next update.
+     */
+    private String getNextUpdate()
     {
         DateTime dateTime = Feeds.NextUpdate;
-
+        String text = "";
         if(dateTime != null)
         {
-            String text = getString(R.string.ActivitySettingNextUpdate);
+            text = getString(R.string.ActivitySettingNextUpdate);
             String date = android.text.format.DateFormat.getDateFormat(getApplicationContext()).format(dateTime.toDate());
             String time = android.text.format.DateFormat.getTimeFormat(getApplicationContext()).format(dateTime.toDate());
             text += date + " " + time;
-            this.nextUpdate.setText(text);
         }
-        else
-        {
-            this.nextUpdate.setText("");
-        }
-
+        return text;
     }
 
-    private void SaveAll()
+    /**
+     * Function SaveAll
+     * for saving all values.
+     * @return Success of save.
+     */
+    private boolean SaveAll()
     {
         boolean success = this.saveDelay();
         success = this.saveRowLimit() && success;
-        if(success)
-        {
-            Message.Long(R.string.ToastSaveSuccessful);
-        }
-        else
-        {
-            Error.Long(R.string.ToastSaveFailed);
-        }
+        return success;
     }
 
+    /**
+     * Function getUnsignedInt
+     * for getting unsigned int from EditText.
+     * @param editText Field to get int from.
+     * @return Fields value as int or -1 if failed.
+     */
     private int getUnsignedInt(EditText editText)
     {
         int value;
@@ -176,36 +209,134 @@ public class SettingsActivity extends AppCompatActivity {
         return value;
     }
 
+    /**
+     * Function saveDelay
+     * for saving update delay.
+     * @return Success of save.
+     */
     private boolean saveDelay()
     {
-        this.delay.setBackgroundColor(this.colorDefault);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                delay.setBackgroundColor(colorDefault);
+            }
+        });
         int value = this.getUnsignedInt(this.delay);
         if(value >= 0)
         {
-            String key = RSSCollection.PREFERENCES_START + "delayHours";
             Global.Feeds.setAlarm(value);
-            makeNextUpdate();
-            return Preference.Set(key, value);
+            return Preference.Set(FeedCollection.PREF_DELAY_HOURS, value);
         }
         else
         {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    delay.setBackgroundColor(colorError);
+                }
+            });
             return false;
         }
     }
 
+    /**
+     * Function saveRowLimit
+     * for saving row limit.
+     * @return Success of save.
+     */
     private boolean saveRowLimit()
     {
-        this.limit.setBackgroundColor(this.colorDefault);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                limit.setBackgroundColor(colorDefault);
+            }
+        });
         int value = this.getUnsignedInt(this.limit);
         if(value >= 0)
         {
-            String key = Global.ROW_LIMIT_KEY;
             new UpdateTask(Feeds).execute();
-            return Preference.Set(key, value);
+            return Preference.Set(Global.ROW_LIMIT_KEY, value);
         }
         else
         {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    limit.setBackgroundColor(colorError);
+                }
+            });
             return false;
         }
+    }
+
+    /**
+     * Function Load
+     * for loading data to fields.
+     * @return Success of load.
+     */
+    @Override
+    public boolean Load() {
+        final String delayText      = String.valueOf(Preference.Get(FeedCollection.PREF_DELAY_HOURS, 24));
+        final String limitText      = String.valueOf(Preference.Get(Global.ROW_LIMIT_KEY, 10));
+        final String nextUpdateText = this.getNextUpdate();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                delay.setText(delayText);
+                limit.setText(limitText);
+                nextUpdate.setText(nextUpdateText);
+            }
+        });
+        return true;
+    }
+
+    /**
+     * Function onLoadSuccess
+     * This gets called when loading has been done and was successful.
+     */
+    @Override
+    public void onLoadSuccess() {
+
+    }
+
+    /**
+     * Function onLoadFailure
+     * This gets called when loading has been done and there were errors.
+     */
+    @Override
+    public void onLoadFailure() {
+        Error.Long(R.string.LoadFailed);
+    }
+
+    /**
+     * Function Save
+     * for saving data from fields.
+     * @return Success of save.
+     */
+    @Override
+    public boolean Save() {
+        return this.SaveAll();
+    }
+
+    /**
+     * Function onSaveSuccess
+     * This gets called when saving has been done and was successful.
+     * Informing user and loading fields.
+     */
+    @Override
+    public void onSaveSuccess() {
+        Message.Long(R.string.ToastSaveSuccessful);
+        new LoadTask(this).execute();
+    }
+
+    /**
+     * Function onSaveFailure
+     * This gets called when saving has been done and there were errors.
+     */
+    @Override
+    public void onSaveFailure() {
+        Error.Long(R.string.ToastSaveFailed);
     }
 }

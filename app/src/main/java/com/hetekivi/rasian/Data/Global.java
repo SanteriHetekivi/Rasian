@@ -3,11 +3,10 @@ package com.hetekivi.rasian.Data;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.os.Environment;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import com.hetekivi.rasian.Data.RSS.RSSCollection;
+import com.hetekivi.rasian.Data.RSS.FeedCollection;
 import com.hetekivi.rasian.Managers.PreferenceManager;
 import com.hetekivi.rasian.Managers.ResourceManager;
 import com.hetekivi.rasian.Managers.ToastManager;
@@ -96,7 +95,7 @@ public class Global
     public static PreferenceManager Preference = null;          // Preferences manager for saving and loading.
     public static ToastManager Message = null;                  // Message manager for sending messages.
     public static ToastManager Error = null;                    // Error manager for sending error messages.
-    public static RSSCollection Feeds = new RSSCollection();    // Collection for managing RSS feeds.
+    public static FeedCollection Feeds = new FeedCollection();    // Collection for managing RSS feeds.
     public static ResourceManager Resource = null;
 
     /**

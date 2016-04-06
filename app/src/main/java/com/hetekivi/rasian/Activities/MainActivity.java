@@ -34,7 +34,7 @@ import static com.hetekivi.rasian.Data.Global.*;
  */
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
-    private static final String TAG = "Global";
+    private static final String TAG = "MainActivity";
 
     private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
     public static Context context;
@@ -59,20 +59,23 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private CheckBox    DialogAddAll;
     private Button      DialogAddButton;
 
-    private static boolean  firstTime   = true;
-    private static boolean  loading     = false;
+    private static boolean  firstTime   = true;     // Is first time running.
+    private static boolean  loading     = false;    // Is loading.
 
-    private LayoutInflater  inflater    = null;
+    private LayoutInflater  inflater    = null; // Inflater for whole activity.
 
-    private Listener onLoadCompleted = new Listener() {
+    /**
+     * Listener for when load is completed.
+     */
+    private Listener FeedsLoadListener = new Listener() {
         @Override
         public void onSuccess() {
-            new UpdateTask(Feeds, onUpdateCompleted).execute();
+            new UpdateTask(Feeds, FeedsUpdateListener).execute();
         }
 
         @Override
         public void onSuccess(Object additional) {
-            new UpdateTask(Feeds, onUpdateCompleted).execute();
+            new UpdateTask(Feeds, FeedsUpdateListener).execute();
         }
 
         @Override
@@ -88,7 +91,10 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         }
     };
 
-    private Listener onUpdateCompleted = new Listener() {
+    /**
+     * Listener for when update is completed.
+     */
+    private Listener FeedsUpdateListener = new Listener() {
         @Override
         public void onSuccess() {
             UpdateTable();
@@ -112,7 +118,10 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         }
     };
 
-    private Listener onFeedAdded = new Listener() {
+    /**
+     * Listener for when feed is added.
+     */
+    private Listener FeedAddListener = new Listener() {
         @Override
         public void onSuccess()
         {
@@ -143,7 +152,10 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         }
     };
 
-    private Listener onFeedRemoved = new Listener() {
+    /**
+     * Listener for when feed is removed.
+     */
+    private Listener FeedRemoveListener = new Listener() {
         @Override
         public void onSuccess() {
             Message.Long(Resource.String(R.string.Feed_Start, R.string.Removed_End));
@@ -176,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     /**
      * Function onCreate
      * gets called when activity is created.
-     * @param savedInstanceState
+     * @param savedInstanceState Bundle containing saved instance state.
      */
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -205,7 +217,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private void firstTime()
     {
         Loading(true);
-        new LoadTask(Feeds, onLoadCompleted).execute();
+        new LoadTask(Feeds, FeedsLoadListener).execute();
         ActivityCompat.requestPermissions(this, new String[]{
                         Manifest.permission.WRITE_EXTERNAL_STORAGE},
                 MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
@@ -374,11 +386,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
      */
     private void ShowAddDialog()
     {
-        if(this.DialogAdd != null && this.DialogAddUrl != null)
-        {
-            this.DialogAddUrl.setText("");
-            this.DialogAdd.show();
-        }
+        this.DialogAddUrl.setText("");
+        this.DialogAdd.show();
     }
 
     /**
@@ -394,7 +403,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         boolean download = this.DialogAddNew.isChecked() || this.DialogAddAll.isChecked();
         if(this.DialogAddAll.isChecked()) lastDownload = Data.DEFAULT_DATE_TIME.minusYears(1);
         Feed feed = new Feed(url, lastDownload, download);
-        new AddTask(Feeds, onFeedAdded, feed).execute(feed);
+        new AddTask(Feeds, FeedAddListener, feed).execute(feed);
     }
 
     /**
@@ -404,7 +413,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private void Update()
     {
         Loading(true);
-        new UpdateTask(Feeds, onUpdateCompleted).execute(false, false);
+        new UpdateTask(Feeds, FeedsUpdateListener).execute(false, false);
     }
 
     /**
@@ -414,7 +423,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private void ShowAll()
     {
         Loading(true);
-        new UpdateTask(Feeds, onUpdateCompleted).execute(false, true);
+        new UpdateTask(Feeds, FeedsUpdateListener).execute(false, true);
     }
 
 

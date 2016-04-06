@@ -50,7 +50,7 @@ public class AddTask extends AsyncTask<Object, Void, Boolean>
     protected Boolean doInBackground(Object... objectsToAdd)
     {
         boolean success = false;
-        if(this.delegate != null && object != null)
+        if(this.delegate != null && objectsToAdd != null)
         {
             success = true;
             for (Object objectToAdd: objectsToAdd)

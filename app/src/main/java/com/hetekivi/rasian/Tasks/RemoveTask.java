@@ -50,7 +50,7 @@ public class RemoveTask extends AsyncTask<Object, Void, Boolean>
     protected Boolean doInBackground(Object... objectsToRemove)
     {
         boolean success = false;
-        if(this.delegate != null && object != null)
+        if(this.delegate != null && objectsToRemove != null)
         {
             success = true;
             for (Object objectToRemove: objectsToRemove)

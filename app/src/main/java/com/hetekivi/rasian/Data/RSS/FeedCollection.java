@@ -28,7 +28,7 @@ import static com.hetekivi.rasian.Data.Global.*;
  * Class RSSCollection
  * for storing and managing Feed feeds.
  */
-public class RSSCollection implements Rowable, Storable, Updatable, Addable, Removable
+public class FeedCollection implements Rowable, Storable, Updatable, Addable, Removable
 {
     /**
      * Public static final values for class.
@@ -38,7 +38,7 @@ public class RSSCollection implements Rowable, Storable, Updatable, Addable, Rem
     /**
      * Constructor
      */
-    public RSSCollection()
+    public FeedCollection()
     {
         this.Feeds = new LinkedHashMap<String, Feed>();
     }
@@ -65,7 +65,7 @@ public class RSSCollection implements Rowable, Storable, Updatable, Addable, Rem
      * for getting all feeds.
      * @return All added feeds.
      */
-    private Map<String,Feed> Feeds()
+    public Map<String,Feed> Feeds()
     {
         return this.Feeds;
     }

@@ -15,36 +15,154 @@ import android.widget.*;
 import com.hetekivi.rasian.Data.Global;
 import com.hetekivi.rasian.Data.RSS.Data;
 import com.hetekivi.rasian.Data.RSS.Feed;
+import com.hetekivi.rasian.Interfaces.Listener;
 import com.hetekivi.rasian.R;
+import com.hetekivi.rasian.Tasks.AddTask;
+import com.hetekivi.rasian.Tasks.RemoveTask;
 import com.hetekivi.rasian.Tasks.SaveTask;
+import com.hetekivi.rasian.Tasks.UpdateTask;
 import org.joda.time.DateTime;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
-import static com.hetekivi.rasian.Data.Global.Feeds;
-import static com.hetekivi.rasian.Data.Global.Message;
+import static com.hetekivi.rasian.Data.Global.*;
+import static com.hetekivi.rasian.Data.Global.Error;
+import static com.hetekivi.rasian.Data.Global.Resource;
 
+
+/**
+ * Activity Feeds
+ * for controlling feeds.
+ */
 public class FeedsActivity extends AppCompatActivity {
 
-    private FloatingActionButton ButtonAdd;
-    private Toolbar toolbar;
-
+    private static final String TAG = "MainActivity";
     public static Context context;
 
-    private static ProgressBar progressBar;
-    private static ScrollView scrollView;
-    private static TableLayout table;
+    /**
+     * Activity's own UI elements.
+     */
+    private FloatingActionButton ButtonAdd;
+    private Toolbar toolbar;
+    private ProgressBar progressBar;
+    private ScrollView scrollView;
+    private TableLayout table;
 
+    /**
+     * Add dialog's UI elements
+     */
     private Dialog DialogAdd;
     private EditText DialogAddUrl;
     private CheckBox DialogAddNew;
     private CheckBox DialogAddAll;
     private Button DialogAddButton;
 
-    private static boolean adding = false;
-
     private static boolean loading = true;
 
+    private LayoutInflater  inflater    = null; // Inflater for whole activity.
+
+    /**
+     * Listener for when feeds saving is completed.
+     */
+    private Listener FeedSaveListener = new Listener() {
+        @Override
+        public void onSuccess() {
+            UpdateTable();
+        }
+
+        @Override
+        public void onSuccess(Object additional) {
+            UpdateTable();
+        }
+
+        @Override
+        public void onFailure() {
+            Loading(false);
+            Error.Long(R.string.ToastSaveFailed);
+        }
+
+        @Override
+        public void onFailure(Object additional) {
+            Loading(false);
+            Error.Long(R.string.ToastSaveFailed);
+        }
+    };
+
+    /**
+     * Listener for when feed is added.
+     */
+    private Listener FeedAddListener = new Listener() {
+        @Override
+        public void onSuccess()
+        {
+            Message.Long(Resource.String(R.string.Feed_Start, R.string.AddedEnd));
+            UpdateTable();
+        }
+
+        @Override
+        public void onSuccess(Object additional)
+        {
+            if(additional != null && additional instanceof Feed)
+            {
+                Message.Long(Resource.String(R.string.Feed_Start, ((Feed) additional).Title(), R.string.AddedEnd));
+            }
+            UpdateTable();
+        }
+
+        @Override
+        public void onFailure() {
+            Loading(false);
+            Error.Long(Resource.String(R.string.Adding_Start, R.string.Failed_End));
+        }
+
+        @Override
+        public void onFailure(Object additional) {
+            Loading(false);
+            Error.Long(Resource.String(R.string.Adding_Start, R.string.Failed_End));
+        }
+    };
+
+    /**
+     * Listener for when feed is removed.
+     */
+    private Listener FeedRemoveListener = new Listener() {
+        @Override
+        public void onSuccess() {
+            Message.Long(Resource.String(R.string.Feed_Start, R.string.Removed_End));
+            UpdateTable();
+        }
+
+        @Override
+        public void onSuccess(Object additional) {
+            if(additional != null && additional instanceof Feed)
+            {
+                Message.Long(Resource.String(R.string.Feed_Start, ((Feed) additional).Title(), R.string.Removed_End));
+            }
+            UpdateTable();
+        }
+
+        @Override
+        public void onFailure() {
+            Loading(false);
+            Message.Long(Resource.String(R.string.Removing_Start, R.string.Failed_End));
+        }
+
+        @Override
+        public void onFailure(Object additional)
+        {
+            Loading(false);
+            Message.Long(Resource.String(R.string.Removing_Start, R.string.Failed_End));
+        }
+    };
+
+
+    /**
+     * Function onCreate
+     * gets called when activity is created.
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +172,10 @@ public class FeedsActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Function firstTime
+     * gets run on first time when app starts.
+     */
     @Override
     protected void onResume()
     {
@@ -104,6 +226,7 @@ public class FeedsActivity extends AppCompatActivity {
         scrollView = (ScrollView) findViewById(R.id.ActivityFeedsScrollView);
         this.DialogAddAll = (CheckBox) this.DialogAdd.findViewById(R.id.DialogRSSAddDownloadAll);
         this.DialogAddNew = (CheckBox) this.DialogAdd.findViewById(R.id.DialogRSSAddDownloadNew);
+        this.inflater    = (LayoutInflater)  this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     /**
@@ -142,89 +265,107 @@ public class FeedsActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
     }
-    
+
+    /**
+     * Function ShowAddDialog
+     * for showing add dialog.
+     */
     private void ShowAddDialog()
     {
+        this.DialogAddUrl.setText("");
         this.DialogAdd.show();
     }
-    
-    public static void UpdateTable()
+
+    /**
+     * Function Add
+     * for adding RSS feed from add dialogs values.
+     */
+    private void Add()
     {
-        if(table != null)
+        this.DialogAdd.hide();
+        Loading(true);
+        String url = this.DialogAddUrl.getText().toString();
+        DateTime lastDownload = new DateTime();
+        boolean download = this.DialogAddNew.isChecked() || this.DialogAddAll.isChecked();
+        if(this.DialogAddAll.isChecked()) lastDownload = Data.DEFAULT_DATE_TIME.minusYears(1);
+        Feed feed = new Feed(url, lastDownload, download);
+        new AddTask(Feeds, FeedAddListener, feed).execute(feed);
+    }
+
+    /**
+     * Function UpdateTable
+     * for updating feed item table.
+     */
+    public void UpdateTable()
+    {
+        this.table.removeAllViews();
+        List<Feed> feeds = new LinkedList<>(Feeds.Feeds().values());
+        for (Feed feed : feeds)
         {
-            /*Map<String, Feed> feeds = Feeds.Feeds();
-            table.removeAllViews();
-            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            for (final Map.Entry<String, Feed> entry : feeds.entrySet())
-            {
-                final Feed feed = entry.getValue();
-                RelativeLayout tableRow = (RelativeLayout) inflater.inflate(R.layout.row_feeds, null);
-                TextView textview = (TextView) tableRow.findViewById(R.id.RowFeedsTextView);
-                textview.setText(feed.Title());
-                textview.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent intent= new Intent(Intent.ACTION_VIEW, Uri.parse(feed.Url()));
-                        context.startActivity(intent);
-                    }
-                });
-                Button button = (Button)tableRow.findViewById(R.id.RowFeedsButton);
-                button.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Loading(true);
-                        Feeds.removeFeed(entry.getKey());
-                    }
-                });
-                final CheckBox download = (CheckBox) tableRow.findViewById(R.id.RowFeedsDownload);
-                download.setChecked(feed.Download());
-                download.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton compoundButton, final boolean b) {
-                        Thread t = new Thread(new Runnable() {
-                            public void run() {
-                                feed.DownloadOn = b;
-                                new SaveTask(feed).execute();
-                            }
-                        });
-                        t.start();
-                    }
-                });
-                table.addView(tableRow);
-            }*/
-        }
-        if(adding)
-        {
-            Message.Long(R.string.ToastAddSuccessful);
-            adding = false;
+            this.addRow(feed);
         }
         Loading(false);
     }
 
-    private void Add()
+
+    /**
+     * Function addRow
+     * for adding row.
+     * @param feed Feed object that will be used for values.
+     * @return Result of the function.
+     */
+    private void addRow(final Feed feed)
     {
-        String url = this.DialogAddUrl.getText().toString();
-        DateTime lastDownload = new DateTime();
-        boolean download = DialogAddNew.isChecked() || DialogAddAll.isChecked();
-        if(DialogAddAll.isChecked()) lastDownload = Data.DEFAULT_DATE_TIME.minusYears(1);
-        this.DialogAddUrl.getText().clear();
-        DialogAdd.hide();
-        //Feeds.addFeed(url, lastDownload, download);
-        adding = true;
-        Loading(true);
+        RelativeLayout  row         = (RelativeLayout)  this.inflater.inflate(R.layout.row_feeds, null);
+        TextView        rowTitle    = (TextView)        row.findViewById(R.id.RowFeedsTextView);
+        Button          rowButton   = (Button)          row.findViewById(R.id.RowFeedsButton);
+        CheckBox        rowDownload = (CheckBox)        row.findViewById(R.id.RowFeedsDownload);
+
+        rowTitle.setText(feed.Title());
+        rowDownload.setChecked(feed.Download());
+
+        rowTitle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent= new Intent(Intent.ACTION_VIEW, Uri.parse(feed.Url()));
+                context.startActivity(intent);
+            }
+        });
+        rowButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Loading(true);
+                new RemoveTask(Feeds, FeedRemoveListener).execute(feed);
+            }
+        });
+        rowDownload.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, final boolean b) {
+                Thread t = new Thread(new Runnable() {
+                    public void run() {
+                        feed.DownloadOn = b;
+                        new SaveTask(feed, FeedSaveListener).execute();
+                    }
+                });
+                t.start();
+            }
+        });
+        this.table.addView(row);
     }
 
-    public static void Loading(boolean status)
+    /**
+     * Function Loading
+     * for setting loading.
+     * @param status Status of loading. false = off, true = on.
+     */
+    private void Loading(boolean status)
     {
-        if(progressBar != null)
+        if(this.progressBar != null)
         {
-            if(status) progressBar.setVisibility(View.VISIBLE);
-            else progressBar.setVisibility(View.GONE);
-        }
-        if(scrollView != null)
-        {
-            if(status) scrollView.setVisibility(View.GONE);
-            else scrollView.setVisibility(View.VISIBLE);
+            if(status) this.progressBar.setVisibility(View.VISIBLE);
+            else {
+                this.progressBar.setVisibility(View.GONE);
+            }
         }
         loading = status;
     }
