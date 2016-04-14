@@ -1,42 +1,153 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="ErrorRSSCollectionNoKey">RSSCollection ei sisällä avainta:</string>
-    <string name="ErrorGlobalStringID">Ei ole string id:tä:</string>
-    <string name="DialogRSSAddButtonAddText">Lisää</string>
-    <string name="DialogRSSAddEditTextUrlHint">Url osoite RSS-syötteelle.</string>
-    <string name="DialogRSSAddDownloadAll">Kaikki</string>
-    <string name="DialogRSSAddDownloadNew">Uudet</string>
-    <string name="DialogRSSAddDownload">Lataa Syötteen Media</string>
-    <string name="DialogRSSAddTitle">Lisää RSS-syöte</string>
     <string name="AppName">Rasian</string>
-    <string name="ActivityMainTitle">Rasian</string>
-    <string name="ActionSettings">Asetukset</string>
-    <string name="title_activity_settings">Asetukset</string>
-    <string name="MenuMainFeeds">Syötteet</string>
-    <string name="RowButtonDownload">Lataa</string>
-    <string name="RowButtonDelete">Poista</string>
+
+
+    <!-- UI -->
+
+    <!-- Activities -->
+
+    <!-- Settings -->
+    <string name="ActivitySettingsLabel">Asetukset</string>
+    <!-- Content -->
+    <string name="ActivitySettingsDelayTitle">Päivitys viive: </string>
     <string name="ActivitySettingsDelayUnit">tuntia</string>
-    <string name="ActivitySettingsDelayTitle">Synkronointiväli</string>
-    <string name="Save">Tallenna</string>
-    <string name="ErrorNoContext">Kontekstiä ei ole asetettu.</string>
-    <string name="ToastSaveSuccessful">Tallennettu!</string>
-    <string name="ToastSaveFailed">Tallennus Epäonnistui!</string>
-    <string name="ToastAddSuccessful">Lisätty!</string>
-    <string name="ToastAddFailed">Lisäys Epäonnistui!</string>
-    <string name="title_activity_feeds">Syötteet</string>
-    <string name="MenuMainShowAll">Näytä kaikki</string>
-    <string name="ActivitySettingsLimitTitle">Näytä otsikoita</string>
+    <string name="ActivitySettingsLimitTitle">Näytettävien nimikkeiden raja: </string>
     <string name="ActivitySettingsLimitUnit">kpl</string>
-    <string name="ActivitySettingNextUpdate"><![CDATA[Seuraava päivitys: ]]></string>
-    <string name="Failed_End"><![CDATA[ epäonnistui!]]></string>
-    <string name="UpdateFailed_End"><![CDATA[ päivitys epäonnistui!]]></string>
-    <string name="Feed_Start"><![CDATA[Syötteen ]]></string>
-    <string name="Removed_End"><![CDATA[ poistettu!]]></string>
-    <string name="IsAlreadyRemoved_End"><![CDATA[ on jo poistettu!]]></string>
-    <string name="LoadFailed">Lataus epäonnistui!</string>
-    <string name="UpdateFailed">Päivitys epäonnistui!</string>
-    <string name="AddedEnd"><![CDATA[ lisätty!]]></string>
-    <string name="Removing_Start"><![CDATA[Poistaminen ]]></string>
-    <string name="Adding_Start"><![CDATA[Lisäys ]]></string>
-    <string name="Saving_Start"><![CDATA[Tallennus ]]></string>
+    <string name="NextUpdate_START">Seuraava päivitys:</string>
+
+    <!-- Feeds -->
+    <string name="ActivityFeedsLabel">Syötteet</string>
+    <!-- Content -->
+    <!-- Row -->
+    <string name="ActivityFeedsRowDelete">Poista</string>
+    <string name="ActivityFeedsRowDownloadOn">Lataus Päällä</string>
+
+    <!-- Main -->
+    <string name="ActivityMainLabel">Rasian</string>
+    <!-- Content -->
+    <!-- Row -->
+    <string name="ActivityMainRowDownload">Lataa</string>
+    <!-- Menu -->
+    <string name="ActivityMainMenuSettings">Asetukset</string>
+    <string name="ActivityMainMenuFeeds">Syötteet</string>
+    <string name="ActivityMainMenuShowAll">Näytä Kaikki</string>
+
+    <!-- SaveLoad -->
+    <string name="ActivitySaveLoadLabel">Tallennus/Lataus</string>
+    <!-- Content -->
+    <string name="ActivitySaveLoadText">
+        Tiedot säilytetään Rasian/options.json tiedostossa.\n
+        Nappuloiden toiminnot:
+    </string>
+    <string name="ActivitySaveLoadLeftButton">
+        - Vasen: Tallentaa tiedot tiedostoon.
+    </string>
+    <string name="ActivitySaveLoadMiddleButton">
+        - Keskimmäinen: Lähettää tiedoston NFC:llä.
+    </string>
+    <string name="ActivitySaveLoadRightButton">
+        - Oikea: Lataa tiedot tiedostosta.
+    </string>
+    <string name="OverwriteWarning">Oletko varma?\nToiminto korvaa kaikki syötteesi ja asetuksesi!</string>
+    <string name="Yes">Kyllä</string>
+    <string name="yes">kyllä</string>
+    <string name="No">Ei</string>
+    <string name="no">ei</string>
+
+    <!-- Dialogs -->
+
+    <!-- AddRss -->
+    <string name="DialogAddRssTitle">Lisää RSS Syöte!</string>
+    <string name="DialogAddRssUrlHint">Url osoite RSS syötteelle.</string>
+    <string name="DialogAddRssDownloadTitle">Lataa</string>
+    <string name="DialogAddRssDownloadNew">Uusi</string>
+    <string name="DialogAddRssDownloadAll">Kaikki</string>
+    <string name="DialogAddRssAdd">Lisää</string>
+
+
+    <!-- Toasts -->
+
+    <!-- Error -->
+    <!-- Message -->
+
+
+    <string name="must_be">täytyy olla</string>
+    <!-- NOUNS -->
+    <string name="Feed">Syöte</string>
+    <string name="feed">syöte</string>
+    <string name="Feeds">Syötteet</string>
+    <string name="feeds">syötteet</string>
+    <string name="kpl">kpl</string>
+    <string name="hours">tuntia</string>
+    <string name="Item">Nimike</string>
+    <string name="item">nimike</string>
+    <string name="Items">Nimikeet</string>
+    <string name="items">nimikeet</string>
+    <string name="Settings">Asetukset</string>
+    <string name="settings">asetukset</string>
+    <!-- ADJECTIVES -->
+    <string name="New">Uusi</string>
+    <string name="_new">uusi</string>
+    <string name="All">Kaikki</string>
+    <string name="all">kaikki</string>
+    <!-- VERBS -->
+    <string name="Remove">Poista</string>
+    <string name="remove">poista</string>
+    <string name="Removing">Poistetaan</string>
+    <string name="removing">poistetaan</string>
+    <string name="Removed_END">Poistettu!</string>
+    <string name="removed_END">poistettu!</string>
+    <string name="Delete">Poista</string>
+    <string name="delete">poista</string>
+    <string name="Deleting">Poistetaan</string>
+    <string name="deleting">poistetaan</string>
+    <string name="Deleted_END">Poistettu!</string>
+    <string name="deleted_END">poistettu!</string>
+    <string name="Add">Lisää</string>
+    <string name="add">lisää</string>
+    <string name="Adding">Lisätään</string>
+    <string name="adding">lisätään</string>
+    <string name="Added_END">Lisätty!</string>
+    <string name="added_END">lisätty!</string>
+    <string name="Save">Tallenna</string>
+    <string name="save">tallenna</string>
+    <string name="Saving">Tallennetaan</string>
+    <string name="saving">tallennetaan</string>
+    <string name="Saved_END">Tallennettu!</string>
+    <string name="saved_END">tallennettu!</string>
+    <string name="Load">Lataa</string>
+    <string name="load">lataa</string>
+    <string name="Loading">Ladataan</string>
+    <string name="loading">ladataan</string>
+    <string name="Loaded_END">Ladattu!</string>
+    <string name="loaded_END">ladattu!</string>
+    <string name="Update">Päivitä</string>
+    <string name="update">päivitä</string>
+    <string name="Updating">päivitetään</string>
+    <string name="updating">päivitetään</string>
+    <string name="Updated_END">Päivitetty!</string>
+    <string name="updated_END">päivitetty!</string>
+    <string name="Fail">Epäonnistua</string>
+    <string name="fail">epäonnistua</string>
+    <string name="Failed_END">Epäonnistui!</string>
+    <string name="failed_END">epäonnistui!</string>
+    <string name="Download">Lataa</string>
+    <string name="download">lataa</string>
+    <string name="Downloading">Ladataan</string>
+    <string name="downloading">ladataan</string>
+    <string name="Downloaded_END">Ladattu!</string>
+    <string name="downloaded_END">ladattu!</string>
+    <string name="Show">Näytä</string>
+    <string name="show">näytä</string>
+    <string name="isAlready">on jo</string>
+    <string name="Exists_END">On olemassa!</string>
+    <string name="File">Tiedosto</string>
+    <string name="Files">Tiedostot</string>
+    <string name="exists_END">on olemassa!</string>
+    <string name="file">tiedosto</string>
+    <string name="files">tiedostot</string>
+    <string name="directory">kansio</string>
+    <string name="Directory">kansio</string>
+    <string name="GettingFileFailed">Tiedoston hakeminen päonnistui!</string>
 </resources>

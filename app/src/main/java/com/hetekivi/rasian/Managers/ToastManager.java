@@ -138,7 +138,7 @@ public class ToastManager
      */
     private void Error(boolean success)
     {
-        if(!success && Global.Check()) Log.e(TAG, Global.Resource.String(R.string.ErrorNoContext));
+        if(!success && Global.Check()) Log.e(TAG, "No context for ToastManager!");
     }
 
     /**

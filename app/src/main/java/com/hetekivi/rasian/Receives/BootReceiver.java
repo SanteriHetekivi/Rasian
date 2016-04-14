@@ -9,6 +9,7 @@ import com.hetekivi.rasian.Managers.PreferenceManager;
 import com.hetekivi.rasian.Tasks.LoadTask;
 import com.hetekivi.rasian.Tasks.SaveTask;
 import com.hetekivi.rasian.Tasks.UpdateTask;
+import net.danlew.android.joda.JodaTimeAndroid;
 
 import static com.hetekivi.rasian.Data.Global.Feeds;
 
@@ -28,21 +29,13 @@ public class BootReceiver extends BroadcastReceiver
      * Listener for load.
      */
     private Listener loadListener = new Listener() {
+
         @Override
-        public void onSuccess() {
+        public void onSuccess(Object additional) {
             Feeds.resetAlarm();
             new UpdateTask(Feeds, updateListener).execute();
         }
 
-        @Override
-        public void onSuccess(Object additional) {
-
-        }
-
-        @Override
-        public void onFailure() {
-
-        }
 
         @Override
         public void onFailure(Object additional) {
@@ -54,18 +47,9 @@ public class BootReceiver extends BroadcastReceiver
      * Listener for update.
      */
     private Listener updateListener = new Listener() {
-        @Override
-        public void onSuccess() {
-            new SaveTask(Feeds, saveListener).execute();
-        }
 
         @Override
         public void onSuccess(Object additional) {
-
-        }
-
-        @Override
-        public void onFailure() {
 
         }
 
@@ -79,17 +63,9 @@ public class BootReceiver extends BroadcastReceiver
      * Listener for save.
      */
     private Listener saveListener = new Listener() {
-        @Override
-        public void onSuccess() {
-        }
 
         @Override
         public void onSuccess(Object additional) {
-
-        }
-
-        @Override
-        public void onFailure() {
 
         }
 
@@ -108,8 +84,10 @@ public class BootReceiver extends BroadcastReceiver
      */
     @Override
     public void onReceive(Context context, Intent intent) {
+        JodaTimeAndroid.init(context);
         Global.Preference = new PreferenceManager(context);
         Global.context = context;
+        Global.WRITE_EXTERNAL_STORAGE = true;
         new LoadTask(Feeds, this.loadListener).execute();
     }
 }

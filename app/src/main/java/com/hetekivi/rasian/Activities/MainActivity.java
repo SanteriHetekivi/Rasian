@@ -20,9 +20,7 @@ import com.hetekivi.rasian.Data.RSS.Data;
 import com.hetekivi.rasian.Data.RSS.Feed;
 import com.hetekivi.rasian.Interfaces.Listener;
 import com.hetekivi.rasian.R;
-import com.hetekivi.rasian.Tasks.AddTask;
-import com.hetekivi.rasian.Tasks.LoadTask;
-import com.hetekivi.rasian.Tasks.UpdateTask;
+import com.hetekivi.rasian.Tasks.*;
 import org.joda.time.DateTime;
 
 import java.util.List;
@@ -69,25 +67,20 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
      */
     private Listener FeedsLoadListener = new Listener() {
         @Override
-        public void onSuccess() {
-            new UpdateTask(Feeds, FeedsUpdateListener).execute();
-        }
-
-        @Override
         public void onSuccess(Object additional) {
             new UpdateTask(Feeds, FeedsUpdateListener).execute();
         }
 
         @Override
-        public void onFailure() {
-            Loading(false);
-            Error.Long(R.string.LoadFailed);
-        }
-
-        @Override
         public void onFailure(Object additional) {
             Loading(false);
-            Error.Long(R.string.LoadFailed);
+            String message;
+            if(additional != null && additional instanceof Feed)
+            {
+                message = Resource.String(R.string.Loading, R.string.feed, ((Feed) additional).Title(), R.string.failed_END);
+            }
+            else message = Resource.String(R.string.Loading, R.string.failed_END);
+            Error.Long(message);
         }
     };
 
@@ -95,10 +88,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
      * Listener for when update is completed.
      */
     private Listener FeedsUpdateListener = new Listener() {
-        @Override
-        public void onSuccess() {
-            UpdateTable();
-        }
 
         @Override
         public void onSuccess(Object additional) {
@@ -106,15 +95,15 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         }
 
         @Override
-        public void onFailure() {
-            Loading(false);
-            Error.Long(R.string.UpdateFailed);
-        }
-
-        @Override
         public void onFailure(Object additional) {
             Loading(false);
-            Error.Long(R.string.UpdateFailed);
+            String message;
+            if(additional != null && additional instanceof Feed)
+            {
+                message = Resource.String(R.string.Updating, R.string.feed, ((Feed) additional).Title(), R.string.failed_END);
+            }
+            else message = Resource.String(R.string.Updating, R.string.failed_END);
+            Error.Long(message);
         }
     };
 
@@ -122,66 +111,30 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
      * Listener for when feed is added.
      */
     private Listener FeedAddListener = new Listener() {
-        @Override
-        public void onSuccess()
-        {
-            Message.Long(Resource.String(R.string.Feed_Start, R.string.AddedEnd));
-            UpdateTable();
-        }
 
         @Override
         public void onSuccess(Object additional)
         {
+            String message;
             if(additional != null && additional instanceof Feed)
             {
-                Message.Long(Resource.String(R.string.Feed_Start, ((Feed) additional).Title(), R.string.AddedEnd));
+                message = Resource.String(R.string.Feed, ((Feed) additional).Title(), R.string.added_END);
             }
+            else message = Resource.String(R.string.Feed, R.string.added_END);
+            Message.Long(message);
             UpdateTable();
-        }
-
-        @Override
-        public void onFailure() {
-            Loading(false);
-            Error.Long(Resource.String(R.string.Adding_Start, R.string.Failed_End));
         }
 
         @Override
         public void onFailure(Object additional) {
             Loading(false);
-            Error.Long(Resource.String(R.string.Adding_Start, R.string.Failed_End));
-        }
-    };
-
-    /**
-     * Listener for when feed is removed.
-     */
-    private Listener FeedRemoveListener = new Listener() {
-        @Override
-        public void onSuccess() {
-            Message.Long(Resource.String(R.string.Feed_Start, R.string.Removed_End));
-            UpdateTable();
-        }
-
-        @Override
-        public void onSuccess(Object additional) {
+            String message;
             if(additional != null && additional instanceof Feed)
             {
-                Message.Long(Resource.String(R.string.Feed_Start, ((Feed) additional).Title(), R.string.Removed_End));
+                message = Resource.String(R.string.Adding, R.string.feed, ((Feed) additional).Title(), R.string.failed_END);
             }
-            UpdateTable();
-        }
-
-        @Override
-        public void onFailure() {
-            Loading(false);
-            Message.Long(Resource.String(R.string.Removing_Start, R.string.Failed_End));
-        }
-
-        @Override
-        public void onFailure(Object additional)
-        {
-            Loading(false);
-            Message.Long(Resource.String(R.string.Removing_Start, R.string.Failed_End));
+            else message = Resource.String(R.string.Adding, R.string.failed_END);
+            Error.Long(message);
         }
     };
 
@@ -284,20 +237,20 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
      */
     private void UIMakeSelect()
     {
-        this.ButtonAdd = (FloatingActionButton) findViewById(R.id.ActivityMainButtonAdd);
+        this.ButtonAdd = (FloatingActionButton) findViewById(R.id.ActivityMainAdd);
         this.toolbar = (Toolbar) findViewById(R.id.ActivityMainToolbar);
         this.table = (TableLayout) findViewById(R.id.ActivityMainTable);
         this.progressBar = (ProgressBar) findViewById(R.id.ActivityMainLoading);
         this.swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.ActivityMainSwipeRefreshLayout);
         this.DialogAdd = new Dialog(this);
         this.DialogAdd.setContentView(R.layout.dialog_add_rss);
-        this.DialogAddUrl = (EditText) DialogAdd.findViewById(R.id.DialogRSSAddEditTextUrl);
-        this.DialogAddButton = (Button) DialogAdd.findViewById(R.id.DialogRSSAddButton);
-        this.DialogAddAll = (CheckBox) DialogAdd.findViewById(R.id.DialogRSSAddDownloadAll);
-        this.DialogAddNew = (CheckBox) DialogAdd.findViewById(R.id.DialogRSSAddDownloadNew);
+        this.DialogAddUrl = (EditText) DialogAdd.findViewById(R.id.DialogAddRssUrl);
+        this.DialogAddButton = (Button) DialogAdd.findViewById(R.id.DialogAddRssAdd);
+        this.DialogAddAll = (CheckBox) DialogAdd.findViewById(R.id.DialogAddRssDownloadAll);
+        this.DialogAddNew = (CheckBox) DialogAdd.findViewById(R.id.DialogAddRssDownloadNew);
         this.scrollView = (ScrollView) findViewById(R.id.ActivityMainScrollView);
-        this.inflater    = (LayoutInflater)  this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-   }
+        this.inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    }
 
     /**
      * Function UIMakeSetValues
@@ -334,9 +287,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         {
             getSupportActionBar().setIcon(R.drawable.toast);
         }
-        catch (NullPointerException ext)
+        catch (Exception e)
         {
-            Log.e(TAG, "No Icon.");
+            Log.e(TAG, e.getLocalizedMessage());
         }
 
     }
@@ -364,16 +317,21 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
-            case R.id.MenuMainSettings:
+            case R.id.ActivityMainMenuSettings:
                 Intent settingsIntent = new Intent(this, SettingsActivity.class);
                 startActivity(settingsIntent);
+                //new ToJSONTask(Feeds, context).execute(OPTIONS_FILE_NAME);
                 return true;
-            case R.id.MenuMainFeeds:
+            case R.id.ActivityMainMenuFeeds:
                 Intent feedsIntent = new Intent(this, FeedsActivity.class);
                 startActivity(feedsIntent);
                 return true;
-            case R.id.MenuMainShowAll:
+            case R.id.ActivityMainMenuShowAll:
                 this.ShowAll();
+                return true;
+            case R.id.ActivityMainMenuSaveLoad:
+                Intent saveLoadIntent = new Intent(this, SaveLoadActivity.class);
+                startActivity(saveLoadIntent);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -431,7 +389,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
      * Function UpdateTable
      * for updating feed item table.
      */
-    public void UpdateTable()
+    private void UpdateTable()
     {
         this.table.removeAllViews();
         List<Data> rows = Feeds.Rows;
@@ -453,8 +411,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     {
 
         RelativeLayout  row         = (RelativeLayout)  this.inflater.inflate(R.layout.row_main, null);
-        TextView        rowTitle    = (TextView)        row.findViewById(R.id.RowMainTextView);
-        Button          rowButton   = (Button)          row.findViewById(R.id.RowMainButton);
+        TextView        rowTitle    = (TextView)        row.findViewById(R.id.ActivityMainRowTitle);
+        Button          rowDownload = (Button)          row.findViewById(R.id.ActivityMainRowDownload);
         rowTitle.setText(data.Title);
         rowTitle.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -464,10 +422,10 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             }
             }
         );
-        rowButton.setOnClickListener(new View.OnClickListener() {
+        rowDownload.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    data.Download(Data.DEFAULT_DATE_TIME.minusMonths(1));
+                    data.Download(Data.DEFAULT_DATE_TIME.minusMonths(1)).execute();
                 }
             }
         );

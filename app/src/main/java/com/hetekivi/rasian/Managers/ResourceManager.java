@@ -70,7 +70,7 @@ public class ResourceManager
             }
             else
             {
-                Log.e(TAG, this.String(R.string.ErrorGlobalStringID));
+                Log.e(TAG, "No string for name: "+idString);
             }
         }
         return str;
@@ -93,7 +93,7 @@ public class ResourceManager
             }
             else
             {
-                Log.e(TAG, this.String(R.string.ErrorGlobalStringID));
+                Log.e(TAG, "No string id: "+id);
             }
         }
         return str;
@@ -108,7 +108,7 @@ public class ResourceManager
      */
     public String String(int id1, int id2)
     {
-        return this.String(id1)+this.String(id2);
+        return this.String(id1)+" "+this.String(id2);
     }
 
     /**
@@ -121,8 +121,36 @@ public class ResourceManager
      */
     public String String(int id1, String between, int id2)
     {
-        return this.String(id1)+between+this.String(id2);
+        return this.String(id1)+" "+between+" "+this.String(id2);
     }
+
+    /**
+     * Function String
+     * for making string from three ids and a string.
+     * @param id1 First string's id.
+     * @param id2 Second string's id.
+     * @param between Third string.
+     * @param id3 Forth string's id.
+     * @return String that combines four strings.
+     */
+    public String String(int id1, int id2, String between, int id3)
+    {
+        return this.String(id1)+" "+this.String(id2)+" "+between+" "+this.String(id3);
+    }
+
+    /**
+     * Function String
+     * for making string from two ids and a string.
+     * @param id1 First string's id.
+     * @param id2 Second string's id.
+     * @param last Third string.
+     * @return String that combines three strings.
+     */
+    public String String(int id1, int id2, String last)
+    {
+        return this.String(id1)+" "+this.String(id2)+" "+last;
+    }
+
     /**
      * Function String
      * for making string from two ids.
@@ -132,7 +160,7 @@ public class ResourceManager
      */
     public String String(int id1, String after)
     {
-        return this.String(id1)+after;
+        return this.String(id1)+" "+after;
     }
 
     /**

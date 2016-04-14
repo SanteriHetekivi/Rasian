@@ -6,10 +6,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="true"
-        tools:context="com.hetekivi.rasian.Activities.FeedsActivity"
-        style="@style/AppTheme"
-        android:background="@color/colorPrimaryLight"
-        >
+        tools:context=".Activities.SaveLoadActivity">
 
     <android.support.design.widget.AppBarLayout
             android:layout_height="wrap_content"
@@ -17,7 +14,7 @@
             android:theme="@style/AppTheme.AppBarOverlay">
 
         <android.support.v7.widget.Toolbar
-                android:id="@+id/ActivityFeedsToolbar"
+                android:id="@+id/ActivitySaveLoadToolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="?attr/colorPrimary"
@@ -25,17 +22,37 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_feeds"/>
+    <include layout="@layout/content_save_load"/>
+
 
     <android.support.design.widget.FloatingActionButton
-            android:id="@+id/ActivityFeedsAdd"
+            android:id="@+id/ActivitySaveLoadSave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|start"
+            android:layout_margin="@dimen/fab_margin"
+            android:src="@android:drawable/ic_menu_save"
+            android:tint="@color/colorPrimary"
+
+    />
+    <android.support.design.widget.FloatingActionButton
+            android:id="@+id/ActivitySaveLoadSend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:layout_margin="@dimen/fab_margin"
+            android:src="@android:drawable/ic_menu_send"
+            android:tint="@color/colorPrimary"
+
+    />
+    <android.support.design.widget.FloatingActionButton
+            android:id="@+id/ActivitySaveLoadLoad"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="@dimen/fab_margin"
-            android:src="@android:drawable/ic_input_add"
+            android:src="@android:drawable/ic_popup_sync"
             android:tint="@color/colorPrimary"
     />
-
 
 </android.support.design.widget.CoordinatorLayout>

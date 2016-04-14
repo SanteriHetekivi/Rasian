@@ -161,7 +161,7 @@ public class SettingsActivity extends AppCompatActivity implements Storable {
         String text = "";
         if(dateTime != null)
         {
-            text = getString(R.string.ActivitySettingNextUpdate);
+            text = getString(R.string.NextUpdate_START);
             String date = android.text.format.DateFormat.getDateFormat(getApplicationContext()).format(dateTime.toDate());
             String time = android.text.format.DateFormat.getTimeFormat(getApplicationContext()).format(dateTime.toDate());
             text += date + " " + time;
@@ -307,7 +307,7 @@ public class SettingsActivity extends AppCompatActivity implements Storable {
      */
     @Override
     public void onLoadFailure() {
-        Error.Long(R.string.LoadFailed);
+        Error.Long(Resource.String(R.string.Loading, R.string.failed_END));
     }
 
     /**
@@ -327,7 +327,7 @@ public class SettingsActivity extends AppCompatActivity implements Storable {
      */
     @Override
     public void onSaveSuccess() {
-        Message.Long(R.string.ToastSaveSuccessful);
+        Message.Long(R.string.Saved_END);
         new LoadTask(this).execute();
     }
 
@@ -337,6 +337,6 @@ public class SettingsActivity extends AppCompatActivity implements Storable {
      */
     @Override
     public void onSaveFailure() {
-        Error.Long(R.string.ToastSaveFailed);
+        Error.Long(Resource.String(R.string.Saving, R.string.failed_END));
     }
 }

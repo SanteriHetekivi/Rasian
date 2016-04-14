@@ -5,6 +5,14 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.NF"/>
+
+    <uses-permission android:name="android.permission.NFC"/>
+
+    <uses-feature
+            android:name="android.hardware.nfc"
+            android:required="false"/>
 
     <application
             android:allowBackup="true"
@@ -16,7 +24,7 @@
         <activity
                 android:name=".Activities.MainActivity"
                 android:icon="@mipmap/ic_launcher"
-                android:label="@string/ActivityMainTitle"
+                android:label="@string/ActivityMainLabel"
                 android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -26,7 +34,7 @@
         </activity>
         <activity
                 android:name=".Activities.FeedsActivity"
-                android:label="@string/title_activity_feeds"
+                android:label="@string/ActivityFeedsLabel"
                 android:parentActivityName=".Activities.MainActivity"
                 android:theme="@style/AppTheme.NoActionBar">
             <meta-data
@@ -35,12 +43,13 @@
         </activity>
         <activity
                 android:name=".Activities.SettingsActivity"
-                android:label="@string/title_activity_settings"
+                android:label="@string/ActivitySettingsLabel"
                 android:parentActivityName=".Activities.MainActivity"
                 android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
-                    android:value="com.hetekivi.rasian.Activities.MainActivity"/>
+                    android:value="com.hetekivi.rasian.Activities.MainActivity"
+            />
         </activity>
 
         <receiver
@@ -53,10 +62,29 @@
                 android:enabled="true"
                 android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
             </intent-filter>
         </receiver>
+        <receiver
+                android:name=".Receives.DownloadReceiver"
+                android:enabled="true"
+                android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.DOWNLOAD_COMPLETE"/>
+            </intent-filter>
+        </receiver>
+
+        <activity
+                android:name=".Activities.SaveLoadActivity"
+                android:label="@string/ActivitySaveLoadLabel"
+                android:parentActivityName=".Activities.MainActivity"
+                android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="com.hetekivi.rasian.Activities.MainActivity"
+            />
+        </activity>
     </application>
 
 </manifest>

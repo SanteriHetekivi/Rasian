@@ -9,6 +9,7 @@ import com.hetekivi.rasian.Managers.PreferenceManager;
 import com.hetekivi.rasian.Tasks.LoadTask;
 import com.hetekivi.rasian.Tasks.SaveTask;
 import com.hetekivi.rasian.Tasks.UpdateTask;
+import net.danlew.android.joda.JodaTimeAndroid;
 import org.joda.time.DateTime;
 
 import static com.hetekivi.rasian.Data.Global.Feeds;
@@ -31,19 +32,10 @@ public class UpdateReceiver extends BroadcastReceiver
      * Listener for load.
      */
     private Listener loadListener = new Listener() {
-        @Override
-        public void onSuccess() {
-            new UpdateTask(Feeds, updateListener).execute(false, false);
-        }
 
         @Override
         public void onSuccess(Object additional) {
-
-        }
-
-        @Override
-        public void onFailure() {
-
+            new UpdateTask(Feeds, updateListener).execute(false, false);
         }
 
         @Override
@@ -56,20 +48,11 @@ public class UpdateReceiver extends BroadcastReceiver
      * Listener for update.
      */
     private Listener updateListener = new Listener() {
-        @Override
-        public void onSuccess() {
-            Feeds.NextUpdate = receiveDateTime.plusMillis(Feeds.DelayMillis());
-            new SaveTask(Feeds, saveListener).execute();
-        }
 
         @Override
         public void onSuccess(Object additional) {
-
-        }
-
-        @Override
-        public void onFailure() {
-
+            Feeds.NextUpdate = receiveDateTime.plusMillis(Feeds.DelayMillis());
+            new SaveTask(Feeds, saveListener).execute();
         }
 
         @Override
@@ -83,16 +66,7 @@ public class UpdateReceiver extends BroadcastReceiver
      */
     private Listener saveListener = new Listener() {
         @Override
-        public void onSuccess() {
-        }
-
-        @Override
         public void onSuccess(Object additional) {
-
-        }
-
-        @Override
-        public void onFailure() {
 
         }
 
@@ -113,9 +87,11 @@ public class UpdateReceiver extends BroadcastReceiver
     @Override
     public void onReceive(Context context, Intent intent)
     {
+        JodaTimeAndroid.init(context);
         this.receiveDateTime = new DateTime();
         Global.Preference = new PreferenceManager(context);
         Global.context = context;
+        Global.WRITE_EXTERNAL_STORAGE = true;
         new LoadTask(Feeds, this.loadListener).execute();
     }
 }

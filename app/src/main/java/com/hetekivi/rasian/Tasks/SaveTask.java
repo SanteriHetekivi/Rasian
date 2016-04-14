@@ -4,7 +4,6 @@ package com.hetekivi.rasian.Tasks;
  * Created by Santeri Hetekivi on 2.4.2016.
  */
 
-import android.os.AsyncTask;
 import com.hetekivi.rasian.Interfaces.Listener;
 import com.hetekivi.rasian.Interfaces.Storable;
 
@@ -12,14 +11,10 @@ import com.hetekivi.rasian.Interfaces.Storable;
  * AsyncTask
  * for loading data from preferences.
  */
-public class SaveTask extends AsyncTask<Void, Void, Boolean>
+public class SaveTask extends RootTask<Void, Void, Boolean>
 {
 
     private Storable delegate = null;
-
-    public Listener listener = null;
-
-    public Object object = null;
 
     public SaveTask(Storable obj)
     {
@@ -43,7 +38,7 @@ public class SaveTask extends AsyncTask<Void, Void, Boolean>
      * Background runner.
      * for saving data to preferences.
      * @param voids Nothing...
-     * @return Data has been loaded.
+     * @return Data has been saved.
      */
     @Override
     protected Boolean doInBackground(Void... voids)
@@ -59,7 +54,7 @@ public class SaveTask extends AsyncTask<Void, Void, Boolean>
     /**
      * Post Executor
      * for telling caller what happened.
-     * @param success All given classes has been loaded.
+     * @param success All given classes has been saved.
      */
     @Override
     protected void onPostExecute(Boolean success) {
@@ -68,19 +63,7 @@ public class SaveTask extends AsyncTask<Void, Void, Boolean>
         {
             if(success) delegate.onSaveSuccess();
             else delegate.onSaveFailure();
-            if(listener != null)
-            {
-                if(success)
-                {
-                    if(this.object != null) listener.onSuccess(this.object);
-                    listener.onSuccess();
-                }
-                else
-                {
-                    if(this.object != null) listener.onFailure(this.object);
-                    listener.onFailure();
-                }
-            }
         }
+        this.callListener(success);
     }
 }

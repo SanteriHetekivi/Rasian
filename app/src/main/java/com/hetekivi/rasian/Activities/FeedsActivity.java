@@ -12,7 +12,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.*;
-import com.hetekivi.rasian.Data.Global;
 import com.hetekivi.rasian.Data.RSS.Data;
 import com.hetekivi.rasian.Data.RSS.Feed;
 import com.hetekivi.rasian.Interfaces.Listener;
@@ -20,12 +19,10 @@ import com.hetekivi.rasian.R;
 import com.hetekivi.rasian.Tasks.AddTask;
 import com.hetekivi.rasian.Tasks.RemoveTask;
 import com.hetekivi.rasian.Tasks.SaveTask;
-import com.hetekivi.rasian.Tasks.UpdateTask;
 import org.joda.time.DateTime;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import static com.hetekivi.rasian.Data.Global.*;
 import static com.hetekivi.rasian.Data.Global.Error;
@@ -67,26 +64,23 @@ public class FeedsActivity extends AppCompatActivity {
      * Listener for when feeds saving is completed.
      */
     private Listener FeedSaveListener = new Listener() {
-        @Override
-        public void onSuccess() {
-            UpdateTable();
-        }
 
         @Override
         public void onSuccess(Object additional) {
             UpdateTable();
         }
 
-        @Override
-        public void onFailure() {
-            Loading(false);
-            Error.Long(R.string.ToastSaveFailed);
-        }
 
         @Override
         public void onFailure(Object additional) {
             Loading(false);
-            Error.Long(R.string.ToastSaveFailed);
+            String message;
+            if(additional != null && additional instanceof Feed)
+            {
+                message = Resource.String(R.string.Saving, R.string.feed, ((Feed) additional).Title(), R.string.failed_END);
+            }
+            else message = Resource.String(R.string.Saving, R.string.failed_END);
+            Error.Long(message);
         }
     };
 
@@ -95,32 +89,28 @@ public class FeedsActivity extends AppCompatActivity {
      */
     private Listener FeedAddListener = new Listener() {
         @Override
-        public void onSuccess()
-        {
-            Message.Long(Resource.String(R.string.Feed_Start, R.string.AddedEnd));
-            UpdateTable();
-        }
-
-        @Override
         public void onSuccess(Object additional)
         {
+            String message;
             if(additional != null && additional instanceof Feed)
             {
-                Message.Long(Resource.String(R.string.Feed_Start, ((Feed) additional).Title(), R.string.AddedEnd));
+                message = Resource.String(R.string.Feed, ((Feed) additional).Title(), R.string.added_END);
             }
+            else message = Resource.String(R.string.Feed, R.string.added_END);
+            Message.Long(message);
             UpdateTable();
-        }
-
-        @Override
-        public void onFailure() {
-            Loading(false);
-            Error.Long(Resource.String(R.string.Adding_Start, R.string.Failed_End));
         }
 
         @Override
         public void onFailure(Object additional) {
             Loading(false);
-            Error.Long(Resource.String(R.string.Adding_Start, R.string.Failed_End));
+            String message;
+            if(additional != null && additional instanceof Feed)
+            {
+                message = Resource.String(R.string.Feed, ((Feed) additional).Title(), R.string.added_END);
+            }
+            else message = Resource.String(R.string.Feed, R.string.added_END);
+            Error.Long(message);
         }
     };
 
@@ -129,31 +119,29 @@ public class FeedsActivity extends AppCompatActivity {
      */
     private Listener FeedRemoveListener = new Listener() {
         @Override
-        public void onSuccess() {
-            Message.Long(Resource.String(R.string.Feed_Start, R.string.Removed_End));
-            UpdateTable();
-        }
-
-        @Override
-        public void onSuccess(Object additional) {
+        public void onSuccess(Object additional)
+        {
+            String message;
             if(additional != null && additional instanceof Feed)
             {
-                Message.Long(Resource.String(R.string.Feed_Start, ((Feed) additional).Title(), R.string.Removed_End));
+                message = Resource.String(R.string.Feed, ((Feed) additional).Title(), R.string.removed_END);
             }
+            else message = Resource.String(R.string.Feed, R.string.removed_END);
+            Message.Long(message);
             UpdateTable();
-        }
-
-        @Override
-        public void onFailure() {
-            Loading(false);
-            Message.Long(Resource.String(R.string.Removing_Start, R.string.Failed_End));
         }
 
         @Override
         public void onFailure(Object additional)
         {
             Loading(false);
-            Message.Long(Resource.String(R.string.Removing_Start, R.string.Failed_End));
+            String message;
+            if(additional != null && additional instanceof Feed)
+            {
+                message = Resource.String(R.string.Removing, R.string.feed, ((Feed) additional).Title(), R.string.failed_END);
+            }
+            else message = Resource.String(R.string.Removing, R.string.failed_END);
+            Error.Long(message);
         }
     };
 
@@ -215,17 +203,17 @@ public class FeedsActivity extends AppCompatActivity {
      */
     private void UIMakeSelect()
     {
-        this.ButtonAdd = (FloatingActionButton) findViewById(R.id.ActivityFeedsButtonAdd);
+        this.ButtonAdd = (FloatingActionButton) findViewById(R.id.ActivityFeedsAdd);
         this.toolbar = (Toolbar) findViewById(R.id.ActivityFeedsToolbar);
         table = (TableLayout) findViewById(R.id.ActivityFeedsTable);
         progressBar = (ProgressBar) findViewById(R.id.ActivityFeedsLoading);
         this.DialogAdd = new Dialog(this);
         this.DialogAdd.setContentView(R.layout.dialog_add_rss);
-        this.DialogAddUrl = (EditText) this.DialogAdd.findViewById(R.id.DialogRSSAddEditTextUrl);
-        this.DialogAddButton = (Button) this.DialogAdd.findViewById(R.id.DialogRSSAddButton);
+        this.DialogAddUrl = (EditText) this.DialogAdd.findViewById(R.id.DialogAddRssUrl);
+        this.DialogAddButton = (Button) this.DialogAdd.findViewById(R.id.DialogAddRssAdd);
         scrollView = (ScrollView) findViewById(R.id.ActivityFeedsScrollView);
-        this.DialogAddAll = (CheckBox) this.DialogAdd.findViewById(R.id.DialogRSSAddDownloadAll);
-        this.DialogAddNew = (CheckBox) this.DialogAdd.findViewById(R.id.DialogRSSAddDownloadNew);
+        this.DialogAddAll = (CheckBox) this.DialogAdd.findViewById(R.id.DialogAddRssDownloadAll);
+        this.DialogAddNew = (CheckBox) this.DialogAdd.findViewById(R.id.DialogAddRssDownloadNew);
         this.inflater    = (LayoutInflater)  this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
@@ -317,12 +305,12 @@ public class FeedsActivity extends AppCompatActivity {
     private void addRow(final Feed feed)
     {
         RelativeLayout  row         = (RelativeLayout)  this.inflater.inflate(R.layout.row_feeds, null);
-        TextView        rowTitle    = (TextView)        row.findViewById(R.id.RowFeedsTextView);
-        Button          rowButton   = (Button)          row.findViewById(R.id.RowFeedsButton);
-        CheckBox        rowDownload = (CheckBox)        row.findViewById(R.id.RowFeedsDownload);
+        TextView        rowTitle    = (TextView)        row.findViewById(R.id.ActivityFeedsRowTitle);
+        Button          rowDelete   = (Button)          row.findViewById(R.id.ActivityFeedsRowDelete);
+        CheckBox        rowDownload = (CheckBox)        row.findViewById(R.id.ActivityFeedsRowDownloadOn);
 
         rowTitle.setText(feed.Title());
-        rowDownload.setChecked(feed.Download());
+        rowDownload.setChecked(feed.DownloadOn);
 
         rowTitle.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -331,11 +319,11 @@ public class FeedsActivity extends AppCompatActivity {
                 context.startActivity(intent);
             }
         });
-        rowButton.setOnClickListener(new View.OnClickListener() {
+        rowDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Loading(true);
-                new RemoveTask(Feeds, FeedRemoveListener).execute(feed);
+                new RemoveTask(Feeds, FeedRemoveListener, feed).execute(feed);
             }
         });
         rowDownload.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -344,7 +332,7 @@ public class FeedsActivity extends AppCompatActivity {
                 Thread t = new Thread(new Runnable() {
                     public void run() {
                         feed.DownloadOn = b;
-                        new SaveTask(feed, FeedSaveListener).execute();
+                        new SaveTask(feed, FeedSaveListener, feed).execute();
                     }
                 });
                 t.start();

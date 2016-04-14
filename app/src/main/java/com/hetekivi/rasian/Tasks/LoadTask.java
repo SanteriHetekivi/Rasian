@@ -12,13 +12,9 @@ import com.hetekivi.rasian.Interfaces.Storable;
  * AsyncTask
  * for loading data from preferences.
  */
-public class LoadTask extends AsyncTask<Void, Void, Boolean>
+public class LoadTask extends RootTask<Void, Void, Boolean>
 {
     private Storable delegate = null;
-
-    public Listener listener = null;
-
-    public Object object = null;
 
     public LoadTask(Storable obj)
     {
@@ -67,19 +63,7 @@ public class LoadTask extends AsyncTask<Void, Void, Boolean>
         {
             if(success) delegate.onLoadSuccess();
             else delegate.onLoadFailure();
-            if(listener != null)
-            {
-                if(success)
-                {
-                    if(this.object != null) listener.onSuccess(this.object);
-                    listener.onSuccess();
-                }
-                else
-                {
-                    if(this.object != null) listener.onFailure(this.object);
-                    listener.onFailure();
-                }
-            }
         }
+        this.callListener(success);
     }
 }

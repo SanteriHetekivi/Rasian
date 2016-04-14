@@ -13,13 +13,13 @@
             android:layout_centerHorizontal="true"
             android:gravity="center_horizontal"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="@string/DialogRSSAddTitle"
-            android:id="@+id/DialogRSSAddTitle"
+            android:text="@string/DialogAddRssTitle"
+            android:id="@+id/DialogAddRssTitle"
             android:layout_alignParentTop="true"
             android:layout_margin="5dp"
     />
     <EditText
-            android:id="@+id/DialogRSSAddEditTextUrl"
+            android:id="@+id/DialogAddRssUrl"
             android:inputType="textUri"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -27,14 +27,14 @@
             android:layout_marginLeft="4dp"
             android:layout_marginRight="4dp"
             android:layout_marginBottom="4dp"
-            android:hint="@string/DialogRSSAddEditTextUrlHint"
-            android:layout_below="@+id/DialogRSSAddTitle"
+            android:hint="@string/DialogAddRssUrlHint"
+            android:layout_below="@+id/DialogAddRssTitle"
     />
     <RelativeLayout
-            android:id="@+id/DialogRSSAddDownload"
+            android:id="@+id/DialogRSSAddDownloadLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/DialogRSSAddEditTextUrl"
+            android:layout_below="@+id/DialogAddRssUrl"
             android:layout_marginLeft="5dp"
             android:layout_marginStart="5dp"
             android:layout_marginEnd="10dp"
@@ -43,10 +43,10 @@
         <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/DialogRSSAddDownload"
+                android:text="@string/DialogAddRssDownloadTitle"
                 android:layout_centerInParent="true"
                 android:layout_centerHorizontal="true"
-                android:id="@+id/DialogRSSAddDownloadTitle"
+                android:id="@+id/DialogAddRssDownloadTitle"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
@@ -55,9 +55,9 @@
         <CheckBox
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/DialogRSSAddDownloadNew"
-                android:id="@+id/DialogRSSAddDownloadNew"
-                android:layout_below="@id/DialogRSSAddDownloadTitle"
+                android:text="@string/DialogAddRssDownloadNew"
+                android:id="@+id/DialogAddRssDownloadNew"
+                android:layout_below="@id/DialogAddRssDownloadTitle"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
@@ -65,19 +65,19 @@
         <CheckBox
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/DialogRSSAddDownloadAll"
-                android:id="@+id/DialogRSSAddDownloadAll"
-                android:layout_below="@id/DialogRSSAddDownloadTitle"
+                android:text="@string/DialogAddRssDownloadAll"
+                android:id="@+id/DialogAddRssDownloadAll"
+                android:layout_below="@id/DialogAddRssDownloadTitle"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
         />
     </RelativeLayout>
     <Button
             android:background="@color/colorAccent"
-            android:layout_below="@+id/DialogRSSAddDownload"
-            android:id="@+id/DialogRSSAddButton"
+            android:layout_below="@+id/DialogRSSAddDownloadLayout"
+            android:id="@+id/DialogAddRssAdd"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/DialogRSSAddButtonAddText"
+            android:text="@string/DialogAddRssAdd"
     />
 </RelativeLayout>

@@ -1,7 +1,13 @@
 package com.hetekivi.rasian.External;
 
+import android.content.Intent;
 import android.net.Uri;
+import android.webkit.MimeTypeMap;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 
 /**
@@ -52,4 +58,23 @@ public class Tools {
         }
         return uri;
     }
+
+    public static Intent PathToOpenFileIntent(String path)
+    {
+        Intent intent = null;
+        File file = new File(path);
+        Uri uri = Uri.fromFile(file);
+        if(uri != null)
+        {
+            MimeTypeMap mime = MimeTypeMap.getSingleton();
+            String extension = path.substring(path.lastIndexOf("."));
+            String type = mime.getMimeTypeFromExtension(extension);
+            intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(uri, type);
+        }
+        return intent;
+    }
+
+
+
 }

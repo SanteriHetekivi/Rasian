@@ -1,41 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="ErrorRSSCollectionNoKey">RSSCollection doesn\'t contain key:</string>
-    <string name="ErrorGlobalStringID">There is no string id:</string>
-    <string name="DialogRSSAddButtonAddText">Add</string>
-    <string name="DialogRSSAddEditTextUrlHint">Url address for RSS feed.</string>
-    <string name="DialogRSSAddDownloadNew">New</string>
-    <string name="DialogRSSAddDownloadAll">All</string>
-    <string name="DialogRSSAddDownload">Download Feed\'s Media</string>
-    <string name="DialogRSSAddTitle">Add RSS Feed</string>
     <string name="AppName">Rasian</string>
-    <string name="ActivityMainTitle">Rasian</string>
-    <string name="ActionSettings">Settings</string>
-    <string name="MenuMainFeeds">Feeds</string>
-    <string name="title_activity_feeds">Feeds</string>
-    <string name="RowButtonDownload">Download</string>
-    <string name="RowButtonDelete">Delete</string>
-    <string name="title_activity_settings">SettingsActivity</string>
-    <string name="ActivitySettingsDelayUnit">hours</string>
-    <string name="ActivitySettingsDelayTitle">Sync Frequency</string>
-    <string name="Save">Save</string>
-    <string name="ErrorNoContext">Context not set!</string>
-    <string name="ToastSaveSuccessful">Saved!</string>
-    <string name="ToastSaveFailed">Saving Failed!</string>
-    <string name="ToastAddSuccessful">Added!</string>
-    <string name="ToastAddFailed">Add Failed!</string>
-    <string name="MenuMainShowAll">Show all</string>
-    <string name="ActivitySettingsLimitTitle">Show items</string>
+
+    <!-- UI -->
+
+    <!-- Activities -->
+
+    <!-- Settings -->
+    <string name="ActivitySettingsLabel">Settings</string>
+    <!-- Content -->
+    <string name="ActivitySettingsDelayTitle">Update delay:</string>
+    <string name="ActivitySettingsDelayUnit">hour</string>
+    <string name="ActivitySettingsLimitTitle">Shown items limit:</string>
     <string name="ActivitySettingsLimitUnit">kpl</string>
-    <string name="ActivitySettingNextUpdate"><![CDATA[Next update: ]]></string>
-    <string name="Failed_End"><![CDATA[ failed!]]></string>
-    <string name="UpdateFailed_End"><![CDATA[ update failed!]]></string>
-    <string name="Feed_Start"><![CDATA[Feed ]]></string>
-    <string name="Removed_End"><![CDATA[ removed!]]></string>
-    <string name="IsAlreadyRemoved_End"><![CDATA[ is already removed!]]></string>
-    <string name="UpdateFailed">Update failed!</string>
-    <string name="LoadFailed">Load failed!</string>
-    <string name="AddedEnd"><![CDATA[ added!]]></string>
-    <string name="Removing_Start"><![CDATA[Removing ]]></string>
-    <string name="Adding_Start"><![CDATA[Adding ]]></string>
-    <string name="Saving_Start"><![CDATA[Saving ]]></string>
+    <string name="NextUpdate_START">Next update:</string>
+
+    <!-- Feeds -->
+    <string name="ActivityFeedsLabel">Feeds</string>
+    <!-- Content -->
+    <!-- Row -->
+    <string name="ActivityFeedsRowDelete">Delete</string>
+    <string name="ActivityFeedsRowDownloadOn">Download On</string>
+
+    <!-- Main -->
+    <string name="ActivityMainLabel">Rasian</string>
+    <!-- Content -->
+    <!-- Row -->
+    <string name="ActivityMainRowDownload">Download</string>
+    <!-- Menu -->
+    <string name="ActivityMainMenuSettings">Settings</string>
+    <string name="ActivityMainMenuFeeds">Feeds</string>
+    <string name="ActivityMainMenuShowAll">Show All</string>
+
+
+    <!-- SaveLoad -->
+    <string name="ActivitySaveLoadLabel">Saving/Loading</string>
+    <!-- Content -->
+    <string name="ActivitySaveLoadText">
+        Data is stored at Rasian/options.json file.\n
+        Button actions:
+    </string>
+    <string name="ActivitySaveLoadLeftButton">
+        - Left: Saves all app data to file.
+    </string>
+    <string name="ActivitySaveLoadMiddleButton">
+        - Middle: Starts sending data trough NFC.
+    </string>
+    <string name="ActivitySaveLoadRightButton">
+        - Right: Load all app data from file.
+    </string>
+    <string name="OverwriteWarning">Are you sure?\nThis action will overwrite your feeds and settings!</string>
+    <string name="Yes">Yes</string>
+    <string name="yes">yes</string>
+    <string name="No">No</string>
+    <string name="no">no</string>
+
+    <!-- Dialogs -->
+
+    <!-- AddRss -->
+    <string name="DialogAddRssTitle">Add RSS Feed!</string>
+    <string name="DialogAddRssUrlHint">Url address for RSS feed.</string>
+    <string name="DialogAddRssDownloadTitle">Download</string>
+    <string name="DialogAddRssDownloadNew">New</string>
+    <string name="DialogAddRssDownloadAll">All</string>
+    <string name="DialogAddRssAdd">Add</string>
+
+
+    <!-- Toasts -->
+
+    <!-- Error -->
+    <!-- Message -->
+
+
+    <string name="must_be">must be</string>
+    <!-- NOUNS -->
+    <string name="Feed">Feed</string>
+    <string name="feed">feed</string>
+    <string name="Feeds">Feeds</string>
+    <string name="feeds">feeds</string>
+    <string name="kpl">kpl</string>
+    <string name="hours">hours</string>
+    <string name="Item">Item</string>
+    <string name="item">item</string>
+    <string name="Items">Items</string>
+    <string name="items">items</string>
+    <string name="Settings">Settings</string>
+    <string name="settings">settings</string>
+    <string name="File">File</string>
+    <string name="file">file</string>
+    <string name="Files">Files</string>
+    <string name="files">files</string>
+    <string name="Directory">Directory</string>
+    <string name="directory">directory</string>
+    <!-- ADJECTIVES -->
+    <string name="New">New</string>
+    <string name="_new">new</string>
+    <string name="All">All</string>
+    <string name="all">all</string>
+    <!-- VERBS -->
+    <string name="Remove">Remove</string>
+    <string name="remove">remove</string>
+    <string name="Removing">Removing</string>
+    <string name="removing">removing</string>
+    <string name="Removed_END">Removed!</string>
+    <string name="removed_END">removed!</string>
+    <string name="Delete">Delete</string>
+    <string name="delete">delete</string>
+    <string name="Deleting">Deleting</string>
+    <string name="deleting">deleting</string>
+    <string name="Deleted_END">Deleted!</string>
+    <string name="deleted_END">deleted!</string>
+    <string name="Add">Add</string>
+    <string name="add">add</string>
+    <string name="Adding">Adding</string>
+    <string name="adding">adding</string>
+    <string name="Added_END">Added!</string>
+    <string name="added_END">added!</string>
+    <string name="Save">Save</string>
+    <string name="save">save</string>
+    <string name="Saving">Saving</string>
+    <string name="saving">saving</string>
+    <string name="Saved_END">Saved!</string>
+    <string name="saved_END">saved!</string>
+    <string name="Load">Load</string>
+    <string name="load">load</string>
+    <string name="Loading">Loading</string>
+    <string name="loading">loading</string>
+    <string name="Loaded_END">Loaded!</string>
+    <string name="loaded_END">loaded!</string>
+    <string name="Update">Update</string>
+    <string name="update">update</string>
+    <string name="Updating">updating</string>
+    <string name="updating">updating</string>
+    <string name="Updated_END">Updated!</string>
+    <string name="updated_END">updated!</string>
+    <string name="Fail">Fail</string>
+    <string name="fail">fail</string>
+    <string name="Failed_END">Failed!</string>
+    <string name="failed_END">failed!</string>
+    <string name="Download">Download</string>
+    <string name="download">download</string>
+    <string name="Downloading">Downloading</string>
+    <string name="downloading">downloading</string>
+    <string name="Downloaded_END">Downloaded!</string>
+    <string name="downloaded_END">downloaded!</string>
+    <string name="Show">Show</string>
+    <string name="show">show</string>
+    <string name="isAlready">is already</string>
+    <string name="Exists_END">Exists!</string>
+    <string name="exists_END">exists!</string>
+    <string name="is">is</string>
+    <string name="GettingFileFailed">Getting file failed!</string>
 </resources>

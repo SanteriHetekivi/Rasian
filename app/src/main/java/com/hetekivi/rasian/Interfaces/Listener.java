@@ -16,7 +16,7 @@ public interface Listener
      * Function onSuccess
      * This gets called when task has been done and was successful.
      */
-    void onSuccess();
+    //void onSuccess();
 
     /**
      * Function onSuccess
@@ -29,7 +29,7 @@ public interface Listener
      * Function onFailure
      * This gets called when task has been done and there were errors.
      */
-    void onFailure();
+    //void onFailure();
 
     /**
      * Function onFailure

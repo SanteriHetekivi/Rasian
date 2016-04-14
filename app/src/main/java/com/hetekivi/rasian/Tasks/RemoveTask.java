@@ -13,14 +13,10 @@ import com.hetekivi.rasian.Interfaces.Removable;
  * AsyncTask
  * for loading data from preferences.
  */
-public class RemoveTask extends AsyncTask<Object, Void, Boolean>
+public class RemoveTask extends RootTask<Object, Void, Boolean>
 {
 
     private Removable delegate = null;
-
-    public Listener listener = null;
-
-    public Object object = null;
 
     public RemoveTask(Removable obj)
     {
@@ -73,19 +69,7 @@ public class RemoveTask extends AsyncTask<Object, Void, Boolean>
         {
             if(success) delegate.onRemoveSuccess();
             else delegate.onRemoveFailure();
-            if(listener != null)
-            {
-                if(success)
-                {
-                    if(this.object != null) listener.onSuccess(this.object);
-                    listener.onSuccess();
-                }
-                else
-                {
-                    if(this.object != null) listener.onFailure(this.object);
-                    listener.onFailure();
-                }
-            }
         }
+        this.callListener(success);
     }
 }

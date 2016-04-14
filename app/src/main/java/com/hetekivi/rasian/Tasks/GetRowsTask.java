@@ -16,13 +16,9 @@ import java.util.List;
  * AsyncTask
  * for getting rows.
  */
-public class GetRowsTask extends AsyncTask<Void, Void, List<Data>>
+public class GetRowsTask extends RootTask<Void, Void, List<Data>>
 {
     private Rowable delegate = null;
-
-    public Listener listener = null;
-
-    public Object object = null;
 
     public GetRowsTask(Rowable obj)
     {
@@ -70,11 +66,7 @@ public class GetRowsTask extends AsyncTask<Void, Void, List<Data>>
         if(delegate != null)
         {
             delegate.onRowsGotten(rows);
-            if(listener != null)
-            {
-                if(this.object != null) listener.onSuccess(this.object);
-                listener.onSuccess();
-            }
         }
+        this.callListener(true);
     }
 }

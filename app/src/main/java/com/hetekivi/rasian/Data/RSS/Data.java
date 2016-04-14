@@ -5,25 +5,31 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
+import android.util.Log;
 import com.hetekivi.rasian.Data.Global;
 import com.hetekivi.rasian.Interfaces.Downloadable;
+import com.hetekivi.rasian.Interfaces.JSON;
 import com.hetekivi.rasian.Interfaces.Storable;
+import com.hetekivi.rasian.R;
 import com.hetekivi.rasian.Tasks.DownloadTask;
+import com.hetekivi.rasian.Tasks.LoadTask;
+import com.hetekivi.rasian.Tasks.SaveTask;
 import org.joda.time.DateTime;
+import org.json.JSONObject;
+import org.xmlpull.v1.XmlPullParser;
 
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static com.hetekivi.rasian.Data.Global.Preference;
-import static com.hetekivi.rasian.Data.Global.context;
+import static com.hetekivi.rasian.Data.Global.*;
 
 /**
  * Class Data
  * for storing and managing RSS Feeds data items.
  */
-public class Data implements Storable, Downloadable, Comparable<Data>
+public class Data implements Storable, Downloadable, Comparable<Data>, JSON
 {
     /**
      * Public static final values for class.
@@ -31,6 +37,20 @@ public class Data implements Storable, Downloadable, Comparable<Data>
     public static final String      DATE_PATTERN     = "EEE, dd MMM yyyy HH:mm:ss zzz";  // Pattern for parsing dates.
     public static final String      TAG              = "RSS.Data";                       // Tag for class.
     public static final DateTime    DEFAULT_DATE_TIME= new DateTime(1980, 1, 1, 1, 1, 1);// 1.1.1980 klo 01:01:01
+
+    /**
+     * Tag names for parsing.
+     * Must be lowercase.
+     */
+    public static final String NAME_TITLE       = "title";
+    public static final String NAME_TIME        = "pubdate";
+    public static final String NAME_LINK        = "link";
+    public static final String NAME_MEDIA       = "media";
+
+    public static boolean IS_MEDIA_NAME(String name)
+    {
+        return name.contains("media") || name.contains("enclosure");
+    }
 
     /**
      * Function PREFERENCES_START
@@ -164,9 +184,7 @@ public class Data implements Storable, Downloadable, Comparable<Data>
     public DownloadTask Download(DateTime limitTime)
     {
         this.limitTime = limitTime;
-        DownloadTask downloadTask = new DownloadTask(this);
-        downloadTask.execute();
-        return downloadTask;
+        return new DownloadTask(this);
     }
 
     /**
@@ -180,40 +198,59 @@ public class Data implements Storable, Downloadable, Comparable<Data>
     {
         DateTime dateTime = DateTime();
         Boolean success = false;
-        if(Check() && this.limitTime != null && dateTime != null && dateTime.isBefore(this.limitTime) &&
+        Log.i(TAG, "Called download:"+ this.Media);
+        if(Check() && this.limitTime != null && dateTime != null && dateTime.isAfter(this.limitTime) &&
                 this.Media != null && Global.isExternalStorageWritable())
         {
             try {
                 Uri Uri = android.net.Uri.parse(this.Media);
-                File file = new File("" + Uri);
-                String path = Environment.DIRECTORY_PODCASTS + "/" + this.Parent + "/" + file.getName();
-                file = new File(path);
                 DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
                 Cursor cursor = downloadManager.query(new DownloadManager.Query());
                 boolean IsInDownloadManager = false;
                 for (int i = 0; i < cursor.getCount(); i++) {
                     cursor.moveToPosition(i);
                     if (Title.equals(cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_TITLE)))) {
-                        IsInDownloadManager = true;
+                        int status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
+                        IsInDownloadManager = (status == DownloadManager.STATUS_PENDING  ||
+                                status == DownloadManager.STATUS_RUNNING);
                         break;
                     }
                 }
-                // Check if there is not file by same name or it is not downloading already.
-                if (!file.exists() && !IsInDownloadManager) {
-                    DownloadManager.Request request = new DownloadManager.Request(Uri);
-                    request.setVisibleInDownloadsUi(true);
-                    request.allowScanningByMediaScanner();
-                    request.setTitle(Title);
-                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_PODCASTS + "/" + Parent, file.getName());
-                    downloadManager.enqueue(request);
+                cursor.close();
+                if(!IsInDownloadManager)
+                {
+                    File file = new File("" + Uri);
+                    String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PODCASTS) + "/" + this.Parent + "/" + file.getName();
+                    file = new File(path);
+                    if (!file.exists()) {
+                        DownloadManager.Request request = new DownloadManager.Request(Uri);
+                        request.setVisibleInDownloadsUi(true);
+                        request.allowScanningByMediaScanner();
+                        request.setTitle(Title);
+                        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_PODCASTS + "/" + Parent, file.getName());
+                        long downloadID = downloadManager.enqueue(request);
+                        Log.i(TAG, "Download started! id: " + String.valueOf(downloadID));
+
+                    } else {
+                        Log.e(TAG, "File " + file.getName() + " exists!");
+                        if (Global.hasMessages() && Global.hasResource()) {
+                            Error.Long(Resource.String(R.string.File, file.getName(), R.string.exists_END));
+                        }
+                    }
+                }
+                else
+                {
+                    Log.e(TAG, "File is downloading!");
                 }
                 success = true;
             }
             catch (Exception e)
             {
                 success = false;
+                Log.e(TAG, e.getLocalizedMessage());
             }
         }
+        else Log.e(TAG, "Download did not pass test! Data: "+this);
         return success;
     }
 
@@ -317,5 +354,106 @@ public class Data implements Storable, Downloadable, Comparable<Data>
     @Override
     public int compareTo(Data data) {
         return this.DateTime().compareTo(data.DateTime());
+    }
+
+
+    /**
+     * Function parseRSS
+     * for parsing values from RSS name and value.
+     * @param name RSS tag name.
+     * @param value Value of RSS tag.
+     */
+    public void parseRSS(String name, String value)
+    {
+        if (name.contains(NAME_TITLE) && this.Title == null)    this.Title = value;
+        else if (name.contains(NAME_TIME) && this.Time == null) this.Time = value;
+        else if (name.contains(NAME_LINK) && this.Link == null) this.Link = value;
+        else if (IS_MEDIA_NAME(name) && this.Media == null)  this.Media = value;
+    }
+
+    /**
+     * Function toJSON
+     * for making object to JSONObject
+     * @return JSONObject that contains objects data.
+     */
+    @Override
+    public JSONObject toJSON() {
+        JSONObject jsonObject = new JSONObject();
+        try
+        {
+            jsonObject.put(NAME_TITLE, this.Title);
+            jsonObject.put(NAME_LINK, this.Link);
+            jsonObject.put(NAME_TIME, this.Time);
+            jsonObject.put(NAME_MEDIA, this.Media);
+        }
+        catch (Exception e)
+        {
+            Log.e(TAG, e.getLocalizedMessage());
+            jsonObject = null;
+        }
+        return jsonObject;
+    }
+
+    /**
+     * Function onToJSONSuccess
+     * This gets called when ToJSONTask has been done and was successful.
+     */
+    @Override
+    public void onToJSONSuccess() {
+
+    }
+
+    /**
+     * Function onToJSONFailure
+     * This gets called when ToJSONTask has been done and there were failure.
+     */
+    @Override
+    public void onToJSONFailure() {
+
+    }
+
+    /**
+     * Function fromJSON
+     * for reading data from JSONObject to object.
+     * @param jsonObject JSONObject to read from.
+     * @return Success of read.
+     */
+    @Override
+    public boolean fromJSON(JSONObject jsonObject) {
+        boolean success = false;
+        if(jsonObject != null) {
+            try {
+                this.Title = jsonObject.getString(NAME_TITLE);
+                this.Link = jsonObject.getString(NAME_LINK);
+                this.Time = jsonObject.getString(NAME_TIME);
+                this.Media = jsonObject.getString(NAME_MEDIA);
+                success = true;
+            } catch (Exception e) {
+                Log.e(TAG, e.getLocalizedMessage());
+                success = false;
+            }
+        }
+        return success;
+    }
+
+    /**
+     * Function onFromJSONSuccess
+     * This gets called when FromJSONTask has been done and was successful.
+     */
+    @Override
+    public void onFromJSONSuccess() {
+        new SaveTask(this).execute();
+        Log.d(TAG, "FromJSONTask Success!");
+    }
+
+    /**
+     * Function onFromJSONFailure
+     * This gets called when FromJSONTask has been done and there were failure.
+     */
+    @Override
+    public void onFromJSONFailure()
+    {
+        new LoadTask(this).execute();
+        Log.e(TAG, "FromJSONTask Failed!");
     }
 }

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignBottom="@+id/ActivitySaveLoadSend"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingBottom="150dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:showIn="@layout/activity_save_load"
+        tools:context=".Activities.SaveLoadActivity">
+
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:id="@+id/ActivitySaveLoadLabel"
+            android:text="@string/ActivitySaveLoadLabel"
+            android:textAppearance="?android:attr/textAppearanceLarge"/>
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/ActivitySaveLoadText"
+            android:text="@string/ActivitySaveLoadText"
+            android:gravity="center_horizontal"
+            android:layout_below="@+id/ActivitySaveLoadLabel"
+            android:layout_centerHorizontal="true"
+    />
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/ActivitySaveLoadLeftButton"
+            android:text="@string/ActivitySaveLoadLeftButton"
+            android:gravity="left"
+            android:layout_below="@+id/ActivitySaveLoadText"
+            android:layout_centerHorizontal="true"/>
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/ActivitySaveLoadMiddleButton"
+            android:text="@string/ActivitySaveLoadMiddleButton"
+            android:gravity="left"
+            android:layout_below="@+id/ActivitySaveLoadLeftButton"
+            android:layout_centerHorizontal="true"
+    />
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/ActivitySaveLoadRightButton"
+            android:gravity="left"
+            android:text="@string/ActivitySaveLoadRightButton"
+            android:layout_below="@+id/ActivitySaveLoadMiddleButton"
+            android:layout_centerHorizontal="true"
+    />
+
+
+</RelativeLayout>

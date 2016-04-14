@@ -52,8 +52,8 @@
                 android:gravity="center_vertical|center"
         />
         <TextView
-                android:id="@+id/ActivitySettingLimitUnit"
-                android:text="@string/ActivitySettingsLimitUnit"
+                android:id="@+id/ActivitySettingsLimitUnit"
+                android:text="@string/kpl"
                 android:layout_column="2"
                 android:layout_span="1"
                 android:gravity="center_vertical|end"
@@ -64,7 +64,7 @@
                 android:id="@+id/ActivitySettingNextUpdate"
                 android:layout_span="3"
                 android:layout_column="0"
-                android:text="@string/ActivitySettingNextUpdate"
+                android:text="@string/NextUpdate_START"
                 android:gravity="center"/>
     </TableRow>
     <TableRow android:layout_width="0dp">

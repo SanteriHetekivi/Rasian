@@ -5,7 +5,12 @@ import com.hetekivi.rasian.Data.Global;
 import com.hetekivi.rasian.Interfaces.*;
 import com.hetekivi.rasian.R;
 import com.hetekivi.rasian.Tasks.DownloadTask;
+import com.hetekivi.rasian.Tasks.LoadTask;
+import com.hetekivi.rasian.Tasks.SaveTask;
+import com.hetekivi.rasian.Tasks.UpdateTask;
 import org.joda.time.DateTime;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
 
@@ -14,7 +19,10 @@ import java.net.URL;
 import java.util.*;
 
 import static com.hetekivi.rasian.Data.Global.*;
+import static com.hetekivi.rasian.Data.RSS.Data.IS_MEDIA_NAME;
+import static com.hetekivi.rasian.Data.RSS.Data.NAME_TITLE;
 import static com.hetekivi.rasian.External.Tools.toURL;
+import static org.xmlpull.v1.XmlPullParser.END_TAG;
 
 /**
  * Created by Santeri Hetekivi on 26.3.2016.
@@ -24,7 +32,7 @@ import static com.hetekivi.rasian.External.Tools.toURL;
  * Class Feed
  * for storing and managing RSS feed.
  */
-public class Feed implements Storable, Downloadable, Updatable, Rowable
+public class Feed implements Storable, Downloadable, Updatable, Rowable, JSON
 {
     /**
      * Public static final values for class.
@@ -56,6 +64,15 @@ public class Feed implements Storable, Downloadable, Updatable, Rowable
     }
 
     /**
+     * Constructor
+     */
+    Feed()
+    {
+
+    }
+
+
+    /**
      * Public static final values for RSS parsing.
      */
 
@@ -63,11 +80,11 @@ public class Feed implements Storable, Downloadable, Updatable, Rowable
      * Tag names for parsing.
      * Must be lowercase.
      */
-    public static final String NAME_ITEM        = "item";
-    public static final String NAME_TITLE       = "title";
-    public static final String NAME_TIME        = "pubdate";
-    public static final String NAME_LINK        = "link";
-    public static final List<String> NAMES_MEDIA= new ArrayList<>(Arrays.asList("media:content", "enclosure"));
+    public static final String NAME_ITEM            = "item";
+    public static final String NAME_TITLE           = "title";
+    public static final String NAME_URL             = "url";
+    public static final String NAME_DOWNLOAD_DATE   = "download_date";
+    public static final String NAME_DOWNLOAD_ON     = "download_on";
 
     /**
      * Attribute names for parsing.
@@ -78,6 +95,25 @@ public class Feed implements Storable, Downloadable, Updatable, Rowable
      * Settings for parsing.
      */
     public static final String ENCODING = "UTF-8"; // Encoding for XML.
+
+
+    /**
+     * Listener for Data object's download task.
+     */
+    private Listener DataDownloadListener = new Listener() {
+        @Override
+        public void onSuccess(Object additional) {
+            if(additional != null && additional instanceof DateTime)
+            {
+                if(DownloadDate((DateTime) additional)) saveDownloadDate();
+            }
+        }
+
+        @Override
+        public void onFailure(Object additional) {
+
+        }
+    };
 
     /**
      * Function PREFERENCES_START
@@ -136,7 +172,7 @@ public class Feed implements Storable, Downloadable, Updatable, Rowable
     private String              Title           = null;                     // Feed's title.
     private String              Url             = null;                     // Feed's url address.
     private DateTime            DownloadDate    = null;                     // Limiter for downloads.
-    public boolean             DownloadOn      = false;                    // DownloadOn toggle.
+    public boolean              DownloadOn      = false;                    // DownloadOn toggle.
     private Map<String, Data>   Data            = new LinkedHashMap<>();    // Feeds items. (Keys is pubDate)
 
     /**
@@ -175,6 +211,22 @@ public class Feed implements Storable, Downloadable, Updatable, Rowable
         return false;
     }
 
+    private boolean DownloadDate(DateTime dateTime)
+    {
+        if(dateTime != null && (this.DownloadDate == null || dateTime.isAfter(this.DownloadDate)))
+        {
+            this.DownloadDate = dateTime;
+            return true;
+        }
+        else
+        {
+            String message = "Given dateTime ";
+            if(dateTime == null) Log.e(TAG, message+"is null!");
+            else Log.e(TAG, message+dateTime.toString()+" is not after DownloadDate "+this.DownloadDate.toString()+"!");
+            return false;
+        }
+    }
+
     /**
      * Function setData
      * for adding and setting data to feed.
@@ -199,7 +251,12 @@ public class Feed implements Storable, Downloadable, Updatable, Rowable
      */
     public boolean AllowDownloads()
     {
-        return this.DownloadOn && Global.isExternalStorageWritable();
+        boolean success = this.DownloadOn && Global.isExternalStorageWritable();
+        if(!success)
+        {
+            Log.e(TAG, "Download not allowed! DownloadOn: "+this.DownloadOn );
+        }
+        return success;
     }
 
     /**
@@ -210,7 +267,18 @@ public class Feed implements Storable, Downloadable, Updatable, Rowable
      */
     public boolean AllowDownloads(Data item)
     {
-        return this.AllowDownloads() && item != null && item.DateTime().isAfter(this.DownloadDate);
+        boolean success = this.AllowDownloads() && item != null && item.DateTime().isAfter(this.DownloadDate);
+        if(!success)
+        {
+            String message = "Download not allowed!";
+            if (item == null) Log.e(TAG, message + " Item is null!");
+            else if (!item.DateTime().isAfter(this.DownloadDate)) {
+                Log.e(TAG, message + " Items DateTime " + item.DateTime() +
+                        " is not after DownloadDate " + this.DownloadDate.toString());
+            }
+            else Log.e(TAG, message);
+        }
+        return success;
     }
 
     /**
@@ -242,6 +310,43 @@ public class Feed implements Storable, Downloadable, Updatable, Rowable
     }
 
     /**
+     * Functions for loading members.
+     */
+    public boolean loadTitle()
+    {
+        return this.Title(Preference.Get(this.PREF_TITLE(), (String)null));
+    }
+    public boolean loadDownloadDate()
+    {
+        String downloadDate = Preference.Get(this.PREF_DOWNLOAD_DATE(), "");
+        boolean success = !downloadDate.isEmpty();
+        if(success) this.DownloadDate = new DateTime(downloadDate);
+        return success;
+    }
+    public boolean loadDownloadOn()
+    {
+        this.DownloadOn = Preference.Get(this.PREF_DOWNLOAD(), false);
+        return true;
+    }
+    public boolean loadData()
+    {
+        boolean success = true;
+        List<String> _rssData = new ArrayList<>();
+        _rssData.addAll(Preference.Get(this.PREF_DATA(), new HashSet<String>()));
+        for(int i = 0; i < _rssData.size(); ++i)
+        {
+            String date = _rssData.get(i);
+            if(date != null)
+            {
+                Data d = new Data(this.Title(), date);
+                success = d.Load() && success;
+                this.setData(d);
+            }
+        }
+        return success;
+    }
+
+    /**
      * Function Load
      * for loading data from preferences.
      * @return Success of load.
@@ -252,22 +357,10 @@ public class Feed implements Storable, Downloadable, Updatable, Rowable
         Boolean success = false;
         if(Global.hasPreference() && this.Url != null)
         {
-            this.Title(Preference.Get(this.PREF_TITLE(), (String)null));
-            this.DownloadDate = new DateTime(Preference.Get(this.PREF_DOWNLOAD_DATE(), ""));
-            this.DownloadOn = Preference.Get(this.PREF_DOWNLOAD(), false);
-            List<String> _rssData = new ArrayList<>();
-            _rssData.addAll(Preference.Get(this.PREF_DATA(), new HashSet<String>()));
-            for(int i = 0; i < _rssData.size(); ++i)
-            {
-                String date = _rssData.get(i);
-                if(date != null)
-                {
-                    Data d = new Data(this.Title(), date);
-                    d.Load();
-                    this.setData(d);
-                }
-            }
-            success = true;
+            success = this.loadTitle();
+            success = this.loadDownloadDate() && success;
+            success = this.loadDownloadOn() && success;
+            success = this.loadData() && success;
         }
         return success;
     }
@@ -291,6 +384,41 @@ public class Feed implements Storable, Downloadable, Updatable, Rowable
     }
 
     /**
+     * Functions for saving members.
+     */
+    public boolean saveTitle()
+    {
+        return Preference.Set(this.PREF_TITLE(), this.Title);
+    }
+    public boolean saveDownloadDate()
+    {
+       return Preference.Set(this.PREF_DOWNLOAD_DATE(), this.DownloadDate.toString());
+    }
+    public boolean saveDownloadOn()
+    {
+        return Preference.Set(this.PREF_DOWNLOAD(), this.DownloadOn);
+    }
+    public boolean saveData()
+    {
+        boolean success = true;
+        Set<String> dataTimes = new HashSet<>();
+        if(this.Data != null)
+        {
+            List<Data> data = new LinkedList<>(this.Data.values());
+            for (Data d : data)
+            {
+                dataTimes.add(d.Time);
+                success = d.Save() && success;
+            }
+        }
+        if(success)
+        {
+            success = Preference.Set(this.PREF_DATA(), dataTimes);
+        }
+        return success;
+    }
+
+    /**
      * Function Save
      * for saving data to preferences.
      * @return Was saving successful.
@@ -301,21 +429,10 @@ public class Feed implements Storable, Downloadable, Updatable, Rowable
         Boolean success = false;
         if(Global.hasPreference())
         {
-            Preference.Set(this.PREF_TITLE(), this.Title);
-            Preference.Set(this.PREF_DOWNLOAD_DATE(), this.DownloadDate.toString());
-            Preference.Set(this.PREF_DOWNLOAD(), this.DownloadOn);
-            Set<String> dataTimes = new HashSet<>();
-            if(this.Data != null)
-            {
-                List<Data> data = new LinkedList<>(this.Data.values());
-                for (Data d : data)
-                {
-                    dataTimes.add(d.Time);
-                    success = d.Save() && success;
-                }
-            }
-            Preference.Set(this.PREF_DATA(), dataTimes);
-            success = true;
+            success = this.saveTitle();
+            success = this.saveDownloadDate() && success;
+            success = this.saveDownloadOn() && success;
+            success = this.saveData() && success;
         }
         return success;
     }
@@ -351,6 +468,12 @@ public class Feed implements Storable, Downloadable, Updatable, Rowable
         {
             item.limitTime = this.DownloadDate;
             task = item.Download(this.DownloadDate);
+            if(task != null)
+            {
+                task.object = item.DateTime();
+                task.listener = this.DataDownloadListener;
+            }
+            else Log.e(TAG, "Download task for item "+item.Title+" is null!");
         }
         return task;
     }
@@ -414,55 +537,71 @@ public class Feed implements Storable, Downloadable, Updatable, Rowable
         if(url != null)
         {
             try {
+                boolean insideItem = false;
+                Data item = null;
+                String name = null;
+                String value = null;
+                List<Data> items = new LinkedList<>();
+
                 XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-                factory.setNamespaceAware(false);
+                factory.setNamespaceAware(true);
                 XmlPullParser xpp = factory.newPullParser();
                 InputStream inputStream = url.openConnection().getInputStream();
                 xpp.setInput(inputStream, ENCODING);
-                boolean insideItem = false;
-                Data item = null;
                 int eventType = xpp.getEventType();
-                String name, value;
                 while (eventType != XmlPullParser.END_DOCUMENT)
                 {
-                    if (eventType == XmlPullParser.START_TAG) {
+                    if(xpp.getName() != null) {
                         name = xpp.getName().toLowerCase();
-                        try {
-                            value = xpp.nextText();
-                        } catch (Exception e) {
-                            value = null;
-                        }
-                        if (name.equalsIgnoreCase(NAME_ITEM)) {
-                            insideItem = true;
-                            item = new Data(this.Title());
-                        }
-                        else if (value != null)
-                        {
-                            if (insideItem)
-                            {
-                                if (name.equals(NAME_TITLE)) item.Title = value;
-                                else if (name.equals(NAME_TIME)) {
-                                    item.Time = value;
-                                    if (!updateAll && item.DateTime().isBefore(this.DownloadDate)) break;
-                                } else if (name.equals(NAME_LINK)) item.Link = value;
-                                else if (NAMES_MEDIA.contains(name)) {
-                                    item.Media = xpp.getAttributeValue(null, MEDIA_ATTRIBUTE);
+                        if (eventType == XmlPullParser.START_TAG) {
+                            if (name.contains(NAME_ITEM)) {
+                                insideItem = true;
+                                item = new Data(this.Title());
+                            } else if ((value = getXMLValue(name, xpp)) != null) {
+                                //Log.d(TAG, name + ": " + value);
+                                if (insideItem) {
+                                    item.parseRSS(name, value);
+                                    if (!updateAll && item.Time != null && !item.DateTime().isAfter(this.DownloadDate)) {
+                                        success = true;
+                                        item = null;
+                                        break;
+                                    }
+                                } else {
+                                    if (name.contains(NAME_TITLE) && (!success || this.Title == null)) {
+                                        success = this.Title(value);
+                                    }
                                 }
-                            } else if (!success && name.equalsIgnoreCase(NAME_TITLE)) {
-                                success = this.Title(value);
                             }
+                        } else if (eventType == END_TAG && name.contains(NAME_ITEM)) {
+                            if (item != null) items.add(item);
+                            item = null;
+                            insideItem = false;
                         }
-                    }
-                    else if (eventType == XmlPullParser.END_TAG && xpp.getName().equalsIgnoreCase(NAME_ITEM)) {
-                        insideItem = false;
-                        if (item != null) this.setData(item);
-                        item = null;
                     }
                     eventType = xpp.next(); //move to next element
                 }
-                if (item != null)
+                if (item != null) items.add(item);
+                if(success && !items.isEmpty())
                 {
-                    this.setData(item);
+                    boolean addSuccess;
+                    for (Data dataItem: items)
+                    {
+                        addSuccess = this.setData(dataItem);
+                        if(addSuccess)
+                        {
+                            if(dataItem.DateTime().isAfter(this.DownloadDate))
+                            {
+                                if (this.DownloadOn) {
+                                    DownloadTask task = this.Download(dataItem);
+                                    if (task != null) task.execute();
+                                    else Log.e(TAG, "Download task for item " + dataItem.Title + " is null!");
+                                } else {
+                                    DownloadDate(dataItem.DateTime());
+                                }
+                            }
+                        }
+                        else Log.e(TAG, "Adding item "+dataItem.Title+" failed!");
+                    }
                 }
             }
             catch (Exception e)
@@ -472,6 +611,29 @@ public class Feed implements Storable, Downloadable, Updatable, Rowable
             }
         }
         return success;
+    }
+
+    private String getXMLValue(String name, XmlPullParser xpp)
+    {
+        String value = null;
+        if(name != null && IS_MEDIA_NAME(name))
+        {
+            try{
+                value = xpp.getAttributeValue(null, MEDIA_ATTRIBUTE);
+            }
+            catch (Exception e) {
+                Log.e(TAG, name+": "+e.getLocalizedMessage());
+            }
+        }
+        else
+        {
+            try {
+                value = xpp.nextText();
+            } catch (Exception e) {
+                Log.e(TAG, name+": "+e.getLocalizedMessage());
+            }
+        }
+        return value;
     }
 
 
@@ -495,9 +657,120 @@ public class Feed implements Storable, Downloadable, Updatable, Rowable
      */
     @Override
     public void onUpdateFailed() {
-        if(Check())
+
+    }
+
+    /**
+     * Function toJSON
+     * for making object to JSONObject
+     * @return JSONObject that contains objects data.
+     */
+    @Override
+    public JSONObject toJSON() {
+        JSONObject jsonObject = new JSONObject();
+        try
         {
-            Error.Long(Resource.String(R.string.Feed_Start, this.Title(), R.string.UpdateFailed_End));
+            jsonObject.put(NAME_TITLE, this.Title);
+            jsonObject.put(NAME_URL, this.Url);
+            jsonObject.put(NAME_DOWNLOAD_DATE, this.DownloadDate.toString());
+            jsonObject.put(NAME_DOWNLOAD_ON, this.DownloadOn);
+            if(this.Data != null)
+            {
+                JSONArray items = new JSONArray();
+                JSONObject item;
+                List<Data> data = new LinkedList<>(this.Data.values());
+                for (Data d : data)
+                {
+                    item = d.toJSON();
+                    if(item != null) items.put(item);
+                }
+                jsonObject.putOpt(NAME_ITEM, items);
+            }
         }
+        catch (Exception e)
+        {
+            Log.e(TAG, e.getLocalizedMessage());
+            jsonObject = null;
+        }
+        return jsonObject;
+    }
+
+    /**
+     * Function onToJSONSuccess
+     * This gets called when ToJSONTask has been done and was successful.
+     */
+    @Override
+    public void onToJSONSuccess() {
+
+    }
+
+    /**
+     * Function onToJSONFailure
+     * This gets called when ToJSONTask has been done and there were failure.
+     */
+    @Override
+    public void onToJSONFailure() {
+
+    }
+
+    /**
+     * Function fromJSON
+     * for reading data from JSONObject to object.
+     * @param jsonObject JSONObject to read from.
+     * @return Success of read.
+     */
+    @Override
+    public boolean fromJSON(JSONObject jsonObject) {
+        boolean success = false;
+        if(jsonObject != null) {
+            try {
+                success = true;
+                this.DownloadDate = new DateTime(jsonObject.getString(NAME_DOWNLOAD_DATE));
+                this.Title = jsonObject.getString(NAME_TITLE);
+                this.Url = jsonObject.getString(NAME_URL);
+                this.DownloadOn = jsonObject.getBoolean(NAME_DOWNLOAD_ON);
+                JSONArray items = jsonObject.getJSONArray(NAME_ITEM);
+                if (items != null) {
+                    this.Data = new LinkedHashMap<>();
+                    boolean dataSuccess;
+                    for (int i = 0; i < items.length(); i++) {
+                        JSONObject item = items.getJSONObject(i);
+                        if (item != null) {
+                            Data data = new Data(this.Title);
+                            dataSuccess = data.fromJSON(item);
+                            if (dataSuccess) {
+                                dataSuccess = this.setData(data);
+                            }
+                            success = dataSuccess && success;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                Log.e(TAG, e.getLocalizedMessage());
+                success = false;
+            }
+        }
+        return success;
+    }
+
+    /**
+     * Function onFromJSONSuccess
+     * This gets called when FromJSONTask has been done and was successful.
+     */
+    @Override
+    public void onFromJSONSuccess() {
+        new SaveTask(this).execute();
+        Log.d(TAG, "FromJSONTask Success!");
+    }
+
+    /**
+     * Function onFromJSONFailure
+     * This gets called when FromJSONTask has been done and there were failure.
+     */
+    @Override
+    public void onFromJSONFailure()
+    {
+        new LoadTask(this).execute();
+        Log.e(TAG, "FromJSONTask Failed!");
     }
 }

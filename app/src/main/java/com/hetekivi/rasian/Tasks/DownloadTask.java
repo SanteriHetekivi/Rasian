@@ -12,13 +12,9 @@ import com.hetekivi.rasian.Interfaces.Listener;
  * AsyncTask
  * for downloading objects.
  */
-public class DownloadTask extends AsyncTask<Void, Void, Boolean>
+public class DownloadTask extends RootTask<Void, Void, Boolean>
 {
     private Downloadable delegate = null;
-
-    public Listener listener = null;
-
-    public Object object = null;
 
     public DownloadTask(Downloadable obj)
     {
@@ -68,19 +64,7 @@ public class DownloadTask extends AsyncTask<Void, Void, Boolean>
         {
             if(success) delegate.onDownloadSuccess();
             else delegate.onDownloadFailure();
-            if(listener != null)
-            {
-                if(success)
-                {
-                    if(this.object != null) listener.onSuccess(this.object);
-                    listener.onSuccess();
-                }
-                else
-                {
-                    if(this.object != null) listener.onFailure(this.object);
-                    listener.onFailure();
-                }
-            }
         }
+        this.callListener(success);
     }
 }

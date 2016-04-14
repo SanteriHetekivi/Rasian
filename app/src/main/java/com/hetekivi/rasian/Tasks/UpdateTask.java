@@ -12,15 +12,10 @@ import com.hetekivi.rasian.Interfaces.Updatable;
 /**
  * for updating data.
  */
-public class UpdateTask extends AsyncTask<Boolean, Void, Boolean>
+public class UpdateTask extends RootTask<Boolean, Void, Boolean>
 {
 
     private Updatable delegate = null;
-
-    public Listener listener = null;
-
-
-    public Object object = null;
 
     public UpdateTask(Updatable obj)
     {
@@ -71,19 +66,7 @@ public class UpdateTask extends AsyncTask<Boolean, Void, Boolean>
         {
             if(success) delegate.onUpdateSuccessful();
             else delegate.onUpdateFailed();
-            if(listener != null)
-            {
-                if(success)
-                {
-                    if(this.object != null) listener.onSuccess(this.object);
-                    listener.onSuccess();
-                }
-                else
-                {
-                    if(this.object != null) listener.onFailure(this.object);
-                    listener.onFailure();
-                }
-            }
         }
+        this.callListener(success);
     }
 }

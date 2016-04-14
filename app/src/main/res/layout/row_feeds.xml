@@ -9,7 +9,7 @@
         android:background="@drawable/row_border"
 >
     <TextView
-            android:id="@+id/RowFeedsTextView"
+            android:id="@+id/ActivityFeedsRowTitle"
             android:textColor="@color/colorAccent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -18,30 +18,30 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:layout_toLeftOf="@+id/RowFeedsButton"
-            android:layout_toStartOf="@+id/RowFeedsButton"
+            android:layout_toLeftOf="@+id/ActivityFeedsRowDelete"
+            android:layout_toStartOf="@+id/ActivityFeedsRowDelete"
     />
 
 
     <Button
-            android:id="@+id/RowFeedsButton"
+            android:id="@+id/ActivityFeedsRowDelete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/RowButtonDelete"
+            android:text="@string/ActivityFeedsRowDelete"
             android:background="@color/colorAccent"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:layout_alignBottom="@+id/RowFeedsTextView"
+            android:layout_alignBottom="@+id/ActivityFeedsRowTitle"
             android:layout_alignParentTop="true"
     />
     <CheckBox
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/RowFeedsDownload"
+            android:id="@+id/ActivityFeedsRowDownloadOn"
             android:textSize="20sp"
             android:textColor="@color/colorAccent"
-            android:text="@string/RowButtonDownload"
-            android:layout_below="@+id/RowFeedsTextView"
+            android:text="@string/ActivityFeedsRowDownloadOn"
+            android:layout_below="@+id/ActivityFeedsRowTitle"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
     />

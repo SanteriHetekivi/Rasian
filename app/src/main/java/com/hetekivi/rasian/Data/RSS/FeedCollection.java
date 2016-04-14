@@ -11,10 +11,10 @@ import com.hetekivi.rasian.Data.Global;
 import com.hetekivi.rasian.Interfaces.*;
 import com.hetekivi.rasian.R;
 import com.hetekivi.rasian.Receives.UpdateReceiver;
-import com.hetekivi.rasian.Tasks.AddTask;
-import com.hetekivi.rasian.Tasks.SaveTask;
-import com.hetekivi.rasian.Tasks.UpdateTask;
+import com.hetekivi.rasian.Tasks.*;
 import org.joda.time.DateTime;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.*;
 
@@ -28,7 +28,7 @@ import static com.hetekivi.rasian.Data.Global.*;
  * Class RSSCollection
  * for storing and managing Feed feeds.
  */
-public class FeedCollection implements Rowable, Storable, Updatable, Addable, Removable
+public class FeedCollection implements Rowable, Storable, Updatable, Addable, Removable, JSON
 {
     /**
      * Public static final values for class.
@@ -40,7 +40,7 @@ public class FeedCollection implements Rowable, Storable, Updatable, Addable, Re
      */
     public FeedCollection()
     {
-        this.Feeds = new LinkedHashMap<String, Feed>();
+        this.Feeds = new LinkedHashMap<>();
     }
 
     /**
@@ -50,6 +50,14 @@ public class FeedCollection implements Rowable, Storable, Updatable, Addable, Re
     public static final String PREF_NEXT_UPDATE = PREFERENCES_START + "NextUpdate";
     public static final String PREF_FEEDS       = PREFERENCES_START + "Feeds";
     public static final String PREF_DELAY_HOURS = PREFERENCES_START + "DelayHours";
+
+    /**
+     * Tag names for parsing.
+     * Must be lowercase.
+     */
+    public static final String NAME_FEED        = "feed";
+    public static final String NAME_NEXT_UPDATE = "next_update";
+    public static final String NAME_DELAY_HOURS = "delay_hours";
 
     /**
      * Classes member variables.
@@ -82,10 +90,6 @@ public class FeedCollection implements Rowable, Storable, Updatable, Addable, Re
         if(this.Feeds().containsKey(url))
         {
             feed = this.Feeds().get(url);
-        }
-        else if(Global.Check())
-        {
-            Log.e(TAG, Resource.String(R.string.ErrorRSSCollectionNoKey, url));
         }
         return feed;
     }
@@ -120,7 +124,7 @@ public class FeedCollection implements Rowable, Storable, Updatable, Addable, Re
         }
         else if(Check())
         {
-            Log.e(TAG, Resource.String(R.string.Feed_Start, R.string.IsAlreadyRemoved_End));
+            Log.e(TAG, "Removing feed with url: "+url+" failed!");
             return false;
         }
         return false;
@@ -143,7 +147,7 @@ public class FeedCollection implements Rowable, Storable, Updatable, Addable, Re
      */
     public int DelayMillis()
     {
-        return this.delayHours * 1000 * 60 * 60;
+        return this.delayHours * 1000 * 60;// * 60;
     }
 
     /**
@@ -159,6 +163,9 @@ public class FeedCollection implements Rowable, Storable, Updatable, Addable, Re
         {
             rows.addAll(feed.Rows());
         }
+        Collections.sort(rows, Collections.reverseOrder());
+        final int limit = (rows.size() < Global.ROW_LIMIT() || Global.ROW_LIMIT() < 0 )?rows.size():Global.ROW_LIMIT();
+        this.Rows = rows.subList(0, limit);
         return rows;
     }
 
@@ -265,7 +272,7 @@ public class FeedCollection implements Rowable, Storable, Updatable, Addable, Re
      */
     @Override
     public void onSaveSuccess() {
-
+        Log.d(TAG, "SaveTask Success!");
     }
 
     /**
@@ -274,7 +281,7 @@ public class FeedCollection implements Rowable, Storable, Updatable, Addable, Re
      */
     @Override
     public void onSaveFailure() {
-
+        Log.e(TAG, "SaveTask Failed!");
     }
 
 
@@ -289,15 +296,12 @@ public class FeedCollection implements Rowable, Storable, Updatable, Addable, Re
     public boolean Update(boolean updateAll, boolean setAll)
     {
         Boolean success = true;
-        List<Data> rows = new LinkedList<>();
         for (Feed feed : this.Feeds.values())
         {
             success = feed.Update(updateAll, setAll) && success;
-            rows.addAll(feed.Rows());
         }
-        Collections.sort(rows, Collections.reverseOrder());
-        final int limit = (rows.size() < Global.ROW_LIMIT() || Global.ROW_LIMIT() < 0 || setAll)?rows.size():Global.ROW_LIMIT();
-        this.Rows = rows.subList(0, limit);
+        List<Data> rows = this.Rows();
+        if(setAll) this.Rows = rows;
         return success;
     }
 
@@ -327,7 +331,7 @@ public class FeedCollection implements Rowable, Storable, Updatable, Addable, Re
     public void setAlarm(int _delayHours)
     {
         this.delayHours = _delayHours;
-        int millis = this.DelayMillis()/60;
+        int millis = this.DelayMillis();
         DateTime nextDate = new DateTime().plusMillis(millis);
         this.SetAlarm(nextDate, millis);
     }
@@ -401,6 +405,10 @@ public class FeedCollection implements Rowable, Storable, Updatable, Addable, Re
             {
                 success = this.Feed(feed);
             }
+            if(success)
+            {
+                this.Rows();
+            }
         }
         return success;
     }
@@ -438,6 +446,7 @@ public class FeedCollection implements Rowable, Storable, Updatable, Addable, Re
             Feed feed = (Feed) objectToRemove;
             if(this.removeFeed(feed.Url()))
             {
+                this.Rows();
                 if(this.Save())
                 {
                     success = true;
@@ -463,5 +472,115 @@ public class FeedCollection implements Rowable, Storable, Updatable, Addable, Re
     @Override
     public void onRemoveFailure() {
 
+    }
+
+    /**
+     * Function toJSON
+     * for making object to JSONObject
+     * @return JSONObject that contains objects data.
+     */
+    @Override
+    public JSONObject toJSON() {
+        JSONObject jsonObject = new JSONObject();
+        try
+        {
+            jsonObject.put(NAME_NEXT_UPDATE, this.NextUpdate.toString());
+            jsonObject.put(NAME_DELAY_HOURS, this.delayHours);
+            if(this.Feeds != null)
+            {
+                JSONArray items = new JSONArray();
+                JSONObject item;
+                List<Feed> feeds = new LinkedList<>(this.Feeds.values());
+                for (Feed feed : feeds)
+                {
+                    item = feed.toJSON();
+                    if(item != null) items.put(item);
+                }
+                jsonObject.putOpt(NAME_FEED, items);
+            }
+        }
+        catch (Exception e)
+        {
+            Log.e(TAG, e.getLocalizedMessage());
+            jsonObject = null;
+        }
+        return jsonObject;
+    }
+
+    /**
+     * Function onToJSONSuccess
+     * This gets called when ToJSONTask has been done and was successful.
+     */
+    @Override
+    public void onToJSONSuccess() {
+        Log.d(TAG, "ToJSONTask Success!");
+    }
+
+    /**
+     * Function onToJSONFailure
+     * This gets called when ToJSONTask has been done and there were failure.
+     */
+    @Override
+    public void onToJSONFailure() {
+        Log.e(TAG, "ToJSONTask Failed!");
+    }
+
+    /**
+     * Function fromJSON
+     * for reading data from JSONObject to object.
+     * @param jsonObject JSONObject to read from.
+     * @return Success of read.
+     */
+    @Override
+    public boolean fromJSON(JSONObject jsonObject) {
+        boolean success = false;
+        if(jsonObject != null) {
+            try {
+                success = true;
+                this.NextUpdate = new DateTime(jsonObject.getString(NAME_NEXT_UPDATE));
+                this.delayHours = jsonObject.getInt(NAME_DELAY_HOURS);
+                JSONArray items = jsonObject.getJSONArray(NAME_FEED);
+                if (items != null) {
+                    this.Feeds = new LinkedHashMap<>();
+                    boolean feedSuccess;
+                    for (int i = 0; i < items.length(); i++) {
+                        JSONObject item = items.getJSONObject(i);
+                        if (item != null) {
+                            Feed feed = new Feed();
+                            feedSuccess = feed.fromJSON(item);
+                            if (feedSuccess) {
+                                feedSuccess = this.Feed(feed);
+                            }
+                            success = feedSuccess && success;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                Log.e(TAG, e.getLocalizedMessage());
+                success = false;
+            }
+        }
+        if(success) this.Rows();
+        return success;
+    }
+
+    /**
+     * Function onFromJSONSuccess
+     * This gets called when FromJSONTask has been done and was successful.
+     */
+    @Override
+    public void onFromJSONSuccess() {
+        new SaveTask(this).execute();
+        Log.d(TAG, "FromJSONTask Success!");
+    }
+
+    /**
+     * Function onFromJSONFailure
+     * This gets called when FromJSONTask has been done and there were failure.
+     */
+    @Override
+    public void onFromJSONFailure() {
+        new LoadTask(this).execute();
+        Log.e(TAG, "FromJSONTask Failed!");
     }
 }
