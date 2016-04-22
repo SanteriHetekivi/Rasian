@@ -52,6 +52,9 @@ public class SaveLoadActivity extends AppCompatActivity implements NFC {
      * Listeners
      */
 
+    /**
+     * Listener for when data has been saved to JSON file.
+     */
     private Listener ToJSONSaveListener = new Listener() {
         @Override
         public void onSuccess(Object additional) {
@@ -64,6 +67,9 @@ public class SaveLoadActivity extends AppCompatActivity implements NFC {
         }
     };
 
+    /**
+     * Listener for sending JSON.
+     */
     private Listener ToJSONSendListener = new Listener() {
         @Override
         public void onSuccess(Object additional) {
@@ -76,18 +82,9 @@ public class SaveLoadActivity extends AppCompatActivity implements NFC {
         }
     };
 
-    private Listener FromJSONReceiveListener = new Listener() {
-        @Override
-        public void onSuccess(Object additional) {
-
-        }
-
-        @Override
-        public void onFailure(Object additional) {
-
-        }
-    };
-
+    /**
+     * Listener for loading JSON.
+     */
     private Listener FromJSONLoadListener = new Listener() {
         @Override
         public void onSuccess(Object additional) {
@@ -101,6 +98,11 @@ public class SaveLoadActivity extends AppCompatActivity implements NFC {
         }
     };
 
+    /**
+     * Function onCreate
+     * gets called when activity is created.
+     * @param savedInstanceState Bundle containing saved instance state.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -209,6 +211,10 @@ public class SaveLoadActivity extends AppCompatActivity implements NFC {
 
     }
 
+    /**
+     * Function StartSending
+     * for sending data with NFC.
+     */
     private void StartSending()
     {
         if(NFCSupported(this)) {
@@ -216,11 +222,19 @@ public class SaveLoadActivity extends AppCompatActivity implements NFC {
         }
     }
 
+    /**
+     * Function StartSaving
+     * for starting to save data to JSON file.
+     */
     private void StartSaving()
     {
         new ToJSONTask(Feeds, ToJSONSaveListener).execute(OptionsFile());
     }
 
+    /**
+     * StartLoading
+     * for stating to load data from JSON file.
+     */
     private void StartLoading()
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -238,6 +252,11 @@ public class SaveLoadActivity extends AppCompatActivity implements NFC {
 
     }
 
+    /**
+     * Function Send
+     * for sending data file with NFC.
+     * @return Success of the send.
+     */
     @Override
     public boolean Send() {
         boolean success = false;
@@ -274,6 +293,13 @@ public class SaveLoadActivity extends AppCompatActivity implements NFC {
         return success;
     }
 
+    /**
+     * Function onActivityResult
+     * as listener for when activity returns with result.
+     * @param requestCode Code for request.
+     * @param resultCode Code for result.
+     * @param data Data for activity.
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -288,8 +314,16 @@ public class SaveLoadActivity extends AppCompatActivity implements NFC {
                     try
                     {
                         ParcelFileDescriptor parcelFileDescriptor = getContentResolver().openFileDescriptor(returnUri, "r");
-                        FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
-                        new FromJSONTask(Feeds, FromJSONLoadListener).execute(fileDescriptor);
+                        if(parcelFileDescriptor != null)
+                        {
+                            FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+                            new FromJSONTask(Feeds, FromJSONLoadListener).execute(fileDescriptor);
+                        }
+                        else
+                        {
+                            Log.e(TAG, "Making ParcelFileDescriptor failed!");
+                            Error.Long(Resource.String(R.string.GettingFileFailed));
+                        }
 
                     }
                     catch (Exception e)
@@ -317,16 +351,13 @@ public class SaveLoadActivity extends AppCompatActivity implements NFC {
         }
     }
 
+    /**
+     * Function Receive
+     * for receiving data.
+     * @return Success of receive.
+     */
     @Override
     public boolean Receive() {
         return false;
-    }
-
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        String action = intent.getAction();
-        Log.d(TAG, "Receiving file! Action:"+action);
-        super.onNewIntent(intent);
     }
 }

@@ -5,6 +5,10 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -30,12 +34,20 @@ import static com.hetekivi.rasian.Data.Global.*;
  * Activity Main
  * Main page of the app.
  */
-public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
+public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener, SensorEventListener{
 
     private static final String TAG = "MainActivity";
 
     private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
     public static Context context;
+
+    private SensorManager sensorManager;
+    private Sensor accolerometer;
+    private static final float SHAKE_DIFFERENCE = 30;
+    private float[] startValues = null;
+    private long lastCheckMillis = 0;
+    private static final long CHANGE_TIMER_MILLIS = 200;
+
 
     /**
      * Activity's own UI elements.
@@ -161,6 +173,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             Loading(true);
             UpdateTable();
         }
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        accolerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorManager.registerListener(this, accolerometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     /**
@@ -405,7 +420,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
      * Function addRow
      * for adding row.
      * @param data Data object that will be used for values.
-     * @return Result of the function.
      */
     private void addRow(final Data data)
     {
@@ -461,5 +475,58 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     @Override
     public void onRefresh() {
         this.Update();
+    }
+
+    /**
+     * Function onSensorChanged
+     * listener for sensor change event.
+     * @param event Sensor event that happened.
+     */
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            checkAccelerometer(event);
+        }
+    }
+
+    /**
+     * Function onAccuracyChanged
+     * listener for sensor accuracy change.
+     * @param sensor Sensor that had change.
+     * @param accuracy Sensor's accuracy.
+     */
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
+    /**
+     * Function checkAccelerometer
+     * for checking Accelerometer values and updating table
+     * if big enough change has happened.
+     * @param event Sensor event for check.
+     */
+    private void checkAccelerometer(SensorEvent event)
+    {
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            float[] values = event.values;
+            long timeDiff = Math.abs(System.currentTimeMillis() - this.lastCheckMillis);
+            if (timeDiff >= MainActivity.CHANGE_TIMER_MILLIS && values.length >= 1 && !loading) {
+                if (this.startValues == null) {
+                    this.startValues = values.clone();
+                } else {
+                    float changeSum = 0;
+                    for (int i = 0; i < startValues.length; ++i) {
+                        float startValue = this.startValues[i];
+                        changeSum += Math.abs(startValue - values[i]);
+                    }
+                    if (changeSum > MainActivity.SHAKE_DIFFERENCE) {
+                        this.Update();
+                        this.lastCheckMillis = System.currentTimeMillis();
+                        this.startValues = null;
+                    }
+                }
+            }
+        }
     }
 }

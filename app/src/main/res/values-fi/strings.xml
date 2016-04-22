@@ -150,4 +150,5 @@
     <string name="directory">kansio</string>
     <string name="Directory">kansio</string>
     <string name="GettingFileFailed">Tiedoston hakeminen päonnistui!</string>
+    <string name="is">on</string>
 </resources>

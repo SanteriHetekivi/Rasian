@@ -147,7 +147,7 @@ public class FeedCollection implements Rowable, Storable, Updatable, Addable, Re
      */
     public int DelayMillis()
     {
-        return this.delayHours * 1000 * 60;// * 60;
+        return this.delayHours * 1000 * 60 * 60;
     }
 
     /**
