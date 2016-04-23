@@ -20,7 +20,7 @@ Features:
 * App is fully ad free.
 * App is Open Source ([GitHub Project](https://github.com/SanteriHetekivi/Rasian)).
 * Code has been published under [Apache 2.0 License](https://raw.githubusercontent.com/SanteriHetekivi/Rasian/master/LICENSE).
-* COMING SOON: App is in [Google Play]().
+* App is in [Google Play](https://play.google.com/store/apps/details?id=com.hetekivi.rasian).
 
 This App was made by Santeri Hetekivi as a school project for Tampere University of Applied Sciences.<br>
 
@@ -45,6 +45,6 @@ Ominaisuudet:
 * Sovellus on täysin mainos vapaa
 * Sovellus on avointa lähdekoodia ([GitHub Projekti](https://github.com/SanteriHetekivi/Rasian)).
 * Koodi on julkaistu [Apache 2.0 Lisenssin](https://raw.githubusercontent.com/SanteriHetekivi/Rasian/master/LICENSE) alla.
-* TULOSSA: Sovellus on  [Google Play]() kaupassa.
+* Sovellus on [Google Play](https://play.google.com/store/apps/details?id=com.hetekivi.rasian) kaupassa.
 
 Tämän sovelluksen on tehnyt Santeri Hetekivi koulu projektina Tampereen Ammattikorkeakoululle.<br>
