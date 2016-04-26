@@ -63,11 +63,12 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     /**
      * Add dialog's UI elements
      */
-    private Dialog      DialogAdd;
-    private EditText    DialogAddUrl;
-    private CheckBox    DialogAddNew;
-    private CheckBox    DialogAddAll;
-    private Button      DialogAddButton;
+    private Dialog          DialogAdd;
+    private EditText        DialogAddUrl;
+    private CheckBox        DialogAddNew;
+    private CheckBox        DialogAddAll;
+    private Button          DialogAddButton;
+    private RelativeLayout  DialogDownloadLayout;
 
     private static boolean  firstTime   = true;     // Is first time running.
     private static boolean  loading     = false;    // Is loading.
@@ -207,6 +208,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             case MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE:
             {
                 Global.WRITE_EXTERNAL_STORAGE = (grantResults[0] == PackageManager.PERMISSION_GRANTED);
+                this.UpdateTable();
             }
         }
     }
@@ -252,19 +254,21 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
      */
     private void UIMakeSelect()
     {
-        this.ButtonAdd = (FloatingActionButton) findViewById(R.id.ActivityMainAdd);
-        this.toolbar = (Toolbar) findViewById(R.id.ActivityMainToolbar);
-        this.table = (TableLayout) findViewById(R.id.ActivityMainTable);
-        this.progressBar = (ProgressBar) findViewById(R.id.ActivityMainLoading);
-        this.swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.ActivityMainSwipeRefreshLayout);
-        this.DialogAdd = new Dialog(this);
+        this.ButtonAdd              = (FloatingActionButton) findViewById(R.id.ActivityMainAdd);
+        this.toolbar                = (Toolbar) findViewById(R.id.ActivityMainToolbar);
+        this.table                  = (TableLayout) findViewById(R.id.ActivityMainTable);
+        this.progressBar            = (ProgressBar) findViewById(R.id.ActivityMainLoading);
+        this.swipeRefreshLayout     = (SwipeRefreshLayout) findViewById(R.id.ActivityMainSwipeRefreshLayout);
+        this.scrollView             = (ScrollView) findViewById(R.id.ActivityMainScrollView);
+        this.inflater               = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        this.DialogAdd              = new Dialog(this);
         this.DialogAdd.setContentView(R.layout.dialog_add_rss);
-        this.DialogAddUrl = (EditText) DialogAdd.findViewById(R.id.DialogAddRssUrl);
-        this.DialogAddButton = (Button) DialogAdd.findViewById(R.id.DialogAddRssAdd);
-        this.DialogAddAll = (CheckBox) DialogAdd.findViewById(R.id.DialogAddRssDownloadAll);
-        this.DialogAddNew = (CheckBox) DialogAdd.findViewById(R.id.DialogAddRssDownloadNew);
-        this.scrollView = (ScrollView) findViewById(R.id.ActivityMainScrollView);
-        this.inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        this.DialogDownloadLayout   = (RelativeLayout) DialogAdd.findViewById(R.id.DialogRSSAddDownloadLayout);
+        this.DialogAddUrl           = (EditText) DialogAdd.findViewById(R.id.DialogAddRssUrl);
+        this.DialogAddButton        = (Button) DialogAdd.findViewById(R.id.DialogAddRssAdd);
+        this.DialogAddAll           = (CheckBox) DialogAdd.findViewById(R.id.DialogAddRssDownloadAll);
+        this.DialogAddNew           = (CheckBox) DialogAdd.findViewById(R.id.DialogAddRssDownloadNew);
     }
 
     /**
@@ -360,6 +364,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private void ShowAddDialog()
     {
         this.DialogAddUrl.setText("");
+        int downloadVisibility = (WRITE_EXTERNAL_STORAGE())?View.VISIBLE:View.GONE;
+        this.DialogDownloadLayout.setVisibility(downloadVisibility);
         this.DialogAdd.show();
     }
 
@@ -373,8 +379,12 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         Loading(true);
         String url = this.DialogAddUrl.getText().toString();
         DateTime lastDownload = new DateTime();
-        boolean download = this.DialogAddNew.isChecked() || this.DialogAddAll.isChecked();
-        if(this.DialogAddAll.isChecked()) lastDownload = Data.DEFAULT_DATE_TIME.minusYears(1);
+        boolean download = false;
+        if(this.DialogDownloadLayout.getVisibility() == View.VISIBLE)
+        {
+            download = this.DialogAddNew.isChecked() || this.DialogAddAll.isChecked();
+            if(this.DialogAddAll.isChecked()) lastDownload = Data.DEFAULT_DATE_TIME.minusYears(1);
+        }
         Feed feed = new Feed(url, lastDownload, download);
         new AddTask(Feeds, FeedAddListener, feed).execute(feed);
     }
@@ -408,9 +418,10 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     {
         this.table.removeAllViews();
         List<Data> rows = Feeds.Rows;
+        boolean download = WRITE_EXTERNAL_STORAGE();
         for (final Data data : rows)
         {
-            this.addRow(data);
+            this.addRow(data, download);
         }
         Loading(false);
     }
@@ -420,29 +431,35 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
      * Function addRow
      * for adding row.
      * @param data Data object that will be used for values.
+     * @param download Boolean for showing download actions.
      */
-    private void addRow(final Data data)
+    private void addRow(final Data data, boolean download)
     {
 
         RelativeLayout  row         = (RelativeLayout)  this.inflater.inflate(R.layout.row_main, null);
         TextView        rowTitle    = (TextView)        row.findViewById(R.id.ActivityMainRowTitle);
-        Button          rowDownload = (Button)          row.findViewById(R.id.ActivityMainRowDownload);
         rowTitle.setText(data.Title);
         rowTitle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(data.Link));
-                    context.startActivity(intent);
-            }
-            }
+                                        @Override
+                                        public void onClick(View view) {
+                                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(data.Link));
+                                            context.startActivity(intent);
+                                        }
+                                    }
         );
-        rowDownload.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    data.Download(Data.DEFAULT_DATE_TIME.minusMonths(1)).execute();
-                }
-            }
-        );
+        Button          rowDownload = (Button)          row.findViewById(R.id.ActivityMainRowDownload);
+        if(download)
+        {
+            rowDownload.setVisibility(View.VISIBLE);
+            rowDownload.setOnClickListener(new View.OnClickListener() {
+                                               @Override
+                                               public void onClick(View view) {
+                                                   data.Download(Data.DEFAULT_DATE_TIME.minusMonths(1)).execute();
+                                               }
+                                           }
+            );
+        }
+        else rowDownload.setVisibility(View.GONE);
         table.addView(row);
     }
 

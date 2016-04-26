@@ -1,6 +1,7 @@
 package com.hetekivi.rasian.Activities;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -16,7 +17,11 @@ import com.hetekivi.rasian.R;
 import com.hetekivi.rasian.Tasks.LoadTask;
 import com.hetekivi.rasian.Tasks.SaveTask;
 import com.hetekivi.rasian.Tasks.UpdateTask;
+import net.rdrei.android.dirchooser.DirectoryChooserActivity;
+import net.rdrei.android.dirchooser.DirectoryChooserConfig;
 import org.joda.time.DateTime;
+
+import java.io.File;
 
 import static com.hetekivi.rasian.Data.Global.*;
 
@@ -28,16 +33,21 @@ public class SettingsActivity extends AppCompatActivity implements Storable {
 
     private static final String TAG = "SettingsActivity";
     public static Context context;
+    public static final int REQUEST_DIRECTORY = 1;
 
     /**
      * Activity's own UI elements.
      */
     private EditText delay;
     private EditText limit;
+    private Button selectDownloadDir;
+    private TextView downloadDir;
     private Toolbar toolbar;
     private TextView nextUpdate;
     private Button save;
 
+    private TableRow downloadDirTitleRow;
+    private TableRow downloadDirRow;
 
     /**
      * Background colors for fields.
@@ -70,7 +80,9 @@ public class SettingsActivity extends AppCompatActivity implements Storable {
     {
         super.onResume();
         Message.UpdateContext(context);
-        this.UIReset();
+        int downloadVisibility = (WRITE_EXTERNAL_STORAGE())?View.VISIBLE:View.GONE;
+        this.downloadDirTitleRow.setVisibility(downloadVisibility);
+        this.downloadDirRow.setVisibility(downloadVisibility);
     }
 
     /**
@@ -102,11 +114,15 @@ public class SettingsActivity extends AppCompatActivity implements Storable {
      */
     private void UIMakeSelect()
     {
-        this.delay = (EditText) findViewById(R.id.ActivitySettingDelay);
-        this.limit = (EditText) findViewById(R.id.ActivitySettingLimit);
-        this.toolbar = (Toolbar) findViewById(R.id.ActivitySettingsToolbar);
-        this.nextUpdate = (TextView) findViewById(R.id.ActivitySettingNextUpdate);
-        this.save = (Button) findViewById(R.id.ActivitySettingSave);
+        this.delay                  = (EditText) findViewById(R.id.ActivitySettingDelay);
+        this.limit                  = (EditText) findViewById(R.id.ActivitySettingLimit);
+        this.toolbar                = (Toolbar) findViewById(R.id.ActivitySettingsToolbar);
+        this.nextUpdate             = (TextView) findViewById(R.id.ActivitySettingNextUpdate);
+        this.save                   = (Button) findViewById(R.id.ActivitySettingSave);
+        this.downloadDir            = (TextView) findViewById(R.id.ActivitySettingDownloadDir);
+        this.selectDownloadDir      = (Button) findViewById(R.id.ActivitySettingsDownloadDirButton);
+        this.downloadDirTitleRow    = (TableRow) findViewById(R.id.ActivitySettingDownloadDirTitleRow);
+        this.downloadDirRow         = (TableRow) findViewById(R.id.ActivitySettingDownloadDirRow);
     }
 
     /**
@@ -132,6 +148,12 @@ public class SettingsActivity extends AppCompatActivity implements Storable {
             // Show the Up button in the action bar.
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+        this.selectDownloadDir.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selectDirectory();
+            }
+        });
         this.save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -139,6 +161,57 @@ public class SettingsActivity extends AppCompatActivity implements Storable {
             }
         });
 
+    }
+
+    /**
+     * Function selectDirectory
+     * for starting activity for selecting directory.
+     */
+    private void selectDirectory()
+    {
+        final Intent chooserIntent = new Intent(this, DirectoryChooserActivity.class);
+
+        final DirectoryChooserConfig config = DirectoryChooserConfig.builder()
+                .newDirectoryName(Resource.String(R.string.DownloadDirectory))
+                .allowReadOnlyDirectory(true)
+                .allowNewDirectoryNameModification(true)
+                .build();
+        chooserIntent.putExtra(DirectoryChooserActivity.EXTRA_CONFIG, config);
+        startActivityForResult(chooserIntent, REQUEST_DIRECTORY);
+    }
+
+    /**
+     * Function onActivityResult
+     * as listener for when activity returns with result.
+     * @param requestCode Code for request.
+     * @param resultCode Code for result.
+     * @param data Data for activity.
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_DIRECTORY) {
+            if (resultCode == DirectoryChooserActivity.RESULT_CODE_DIR_SELECTED) {
+                setDirectory(data.getStringExtra(DirectoryChooserActivity.RESULT_SELECTED_DIR));
+            }
+        }
+    }
+
+    /**
+     * Function setDirectory
+     * for setting given string as download directory if it is path to directory.
+     * @param directory Path to directory.
+     */
+    private void setDirectory(String directory) {
+        if(directory != null)
+        {
+            File dir = new File(directory);
+            if(dir.exists() && dir.isDirectory())
+            {
+                this.downloadDir.setText(directory);
+            }
+        }
     }
 
     /**
@@ -178,6 +251,7 @@ public class SettingsActivity extends AppCompatActivity implements Storable {
     {
         boolean success = this.saveDelay();
         success = this.saveRowLimit() && success;
+        success = this.saveDownloadDir() && success;
         return success;
     }
 
@@ -222,6 +296,38 @@ public class SettingsActivity extends AppCompatActivity implements Storable {
                 delay.setBackgroundColor(colorDefault);
             }
         });
+        String value = this.downloadDir.getText().toString();
+        if(!value.isEmpty())
+        {
+            File dir = new File(value);
+            if(dir.exists() && dir.isDirectory())
+            {
+                Feeds.downloadDir = dir;
+                return Preference.Set(FeedCollection.PREF_DOWNLOAD_DIR, value);
+            }
+
+        }
+        runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    delay.setBackgroundColor(colorError);
+                }
+            });
+        return false;
+    }
+
+    /**
+     * Function for saving Download Directory
+     * @return
+     */
+    private boolean saveDownloadDir()
+    {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                delay.setBackgroundColor(colorDefault);
+            }
+        });
         int value = this.getUnsignedInt(this.delay);
         if(value >= 0)
         {
@@ -233,7 +339,7 @@ public class SettingsActivity extends AppCompatActivity implements Storable {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    delay.setBackgroundColor(colorError);
+                    downloadDir.setBackgroundColor(colorError);
                 }
             });
             return false;
@@ -256,8 +362,9 @@ public class SettingsActivity extends AppCompatActivity implements Storable {
         int value = this.getUnsignedInt(this.limit);
         if(value >= 0)
         {
+            Global.Feeds.RowLimit = value;
             new UpdateTask(Feeds).execute();
-            return Preference.Set(Global.ROW_LIMIT_KEY, value);
+            return Preference.Set(FeedCollection.PREF_ROW_LIMIT, value);
         }
         else
         {
@@ -278,8 +385,13 @@ public class SettingsActivity extends AppCompatActivity implements Storable {
      */
     @Override
     public boolean Load() {
-        final String delayText      = String.valueOf(Preference.Get(FeedCollection.PREF_DELAY_HOURS, 24));
-        final String limitText      = String.valueOf(Preference.Get(Global.ROW_LIMIT_KEY, 10));
+        final String delayText          = String.valueOf(Preference.Get(FeedCollection.PREF_DELAY_HOURS,
+                FeedCollection.DEFAULT_DELAY_HOURS));
+        final String limitText          = String.valueOf(Preference.Get(FeedCollection.PREF_ROW_LIMIT,
+                FeedCollection.DEFAULT_ROW_LIMIT));
+        final String downloadDirText    = Preference.Get(FeedCollection.PREF_DOWNLOAD_DIR,
+                FeedCollection.DEFAULT_DOWNLOAD_DIR);
+
         final String nextUpdateText = this.getNextUpdate();
         runOnUiThread(new Runnable() {
             @Override
@@ -287,6 +399,7 @@ public class SettingsActivity extends AppCompatActivity implements Storable {
                 delay.setText(delayText);
                 limit.setText(limitText);
                 nextUpdate.setText(nextUpdateText);
+                downloadDir.setText(downloadDirText);
             }
         });
         return true;

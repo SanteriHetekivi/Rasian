@@ -56,10 +56,24 @@ public class Global
         return success;
     }
 
-    /**
-     * Public static final keys for preferences.
-     */
-    public static final String ROW_LIMIT_KEY = "ROW_LIMIT";
+
+    public static File DownloadDir()
+    {
+        if(Feeds != null && Feeds.downloadDir != null && Feeds.downloadDir.exists())
+        {
+            return Feeds.downloadDir;
+        }
+        else return new File(FeedCollection.DEFAULT_DOWNLOAD_DIR);
+    }
+
+    public static String DownloadDirString()
+    {
+        if(Feeds != null && Feeds.downloadDir != null && Feeds.downloadDir.exists())
+        {
+            return Feeds.downloadDir.getPath();
+        }
+        else return FeedCollection.DEFAULT_DOWNLOAD_DIR;
+    }
 
     /**
      * Function ROW_LIMIT
@@ -68,12 +82,8 @@ public class Global
      */
     public static int ROW_LIMIT()
     {
-        int value = 10;
-        if(Preference != null)
-        {
-            value = Preference.Get(ROW_LIMIT_KEY, value);
-        }
-        return value;
+        if(Feeds != null) return Feeds.RowLimit;
+        else return FeedCollection.DEFAULT_ROW_LIMIT;
     }
 
     /**
@@ -81,7 +91,7 @@ public class Global
      * for checking if writing to external storage is allowed.
      * @return Result of the test.
      */
-    private static boolean WRITE_EXTERNAL_STORAGE()
+    public static boolean WRITE_EXTERNAL_STORAGE()
     {
         boolean result = false;
         if(hasContext() && WRITE_EXTERNAL_STORAGE)
@@ -232,7 +242,6 @@ public class Global
         if(hasPreference())
         {
             Preference.Clear();
-            Preference.Set(ROW_LIMIT_KEY, ROW_LIMIT());
             if(Feeds != null) new SaveTask(Feeds).execute();
         }
         else Log.e(TAG, "Trying to save without Preferences!");

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
           package="com.hetekivi.rasian">
 
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -7,7 +7,6 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.NFC"/>
-
     <uses-feature
             android:name="android.hardware.nfc"
             android:required="false"/>
@@ -18,7 +17,8 @@
             android:icon="@mipmap/ic_launcher"
             android:label="@string/AppName"
             android:supportsRtl="true"
-            android:theme="@style/AppTheme">
+            android:theme="@style/AppTheme"
+            tools:replace="android:theme">
         <activity
                 android:name=".Activities.MainActivity"
                 android:icon="@mipmap/ic_launcher"
@@ -83,6 +83,7 @@
                     android:value="com.hetekivi.rasian.Activities.MainActivity"
             />
         </activity>
+        <activity android:name="net.rdrei.android.dirchooser.DirectoryChooserActivity" />
     </application>
 
 </manifest>

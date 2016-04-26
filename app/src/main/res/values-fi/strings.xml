@@ -151,4 +151,8 @@
     <string name="Directory">kansio</string>
     <string name="GettingFileFailed">Tiedoston hakeminen päonnistui!</string>
     <string name="is">on</string>
+    <string name="ActivitySettingsDownloadDirTitle">Lataus kansio:</string>
+    <string name="ActivitySettingsDownloadDir">Valitse</string>
+    <string name="DownloadDirectory">Lataus Kansio</string>
+    <string name="MakingDirectory">Kansion luonti</string>
 </resources>

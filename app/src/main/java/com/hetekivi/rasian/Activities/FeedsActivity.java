@@ -50,11 +50,12 @@ public class FeedsActivity extends AppCompatActivity {
     /**
      * Add dialog's UI elements
      */
-    private Dialog DialogAdd;
-    private EditText DialogAddUrl;
-    private CheckBox DialogAddNew;
-    private CheckBox DialogAddAll;
-    private Button DialogAddButton;
+    private Dialog          DialogAdd;
+    private RelativeLayout  DialogDownloadLayout;
+    private EditText        DialogAddUrl;
+    private CheckBox        DialogAddNew;
+    private CheckBox        DialogAddAll;
+    private Button          DialogAddButton;
 
     private static boolean loading = true;
 
@@ -211,7 +212,9 @@ public class FeedsActivity extends AppCompatActivity {
         this.DialogAdd.setContentView(R.layout.dialog_add_rss);
         this.DialogAddUrl = (EditText) this.DialogAdd.findViewById(R.id.DialogAddRssUrl);
         this.DialogAddButton = (Button) this.DialogAdd.findViewById(R.id.DialogAddRssAdd);
-        scrollView = (ScrollView) findViewById(R.id.ActivityFeedsScrollView);
+        this.scrollView = (ScrollView) findViewById(R.id.ActivityFeedsScrollView);
+        this.DialogDownloadLayout   = (RelativeLayout) DialogAdd.findViewById(R.id.DialogRSSAddDownloadLayout);
+
         this.DialogAddAll = (CheckBox) this.DialogAdd.findViewById(R.id.DialogAddRssDownloadAll);
         this.DialogAddNew = (CheckBox) this.DialogAdd.findViewById(R.id.DialogAddRssDownloadNew);
         this.inflater    = (LayoutInflater)  this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -261,6 +264,8 @@ public class FeedsActivity extends AppCompatActivity {
     private void ShowAddDialog()
     {
         this.DialogAddUrl.setText("");
+        int downloadVisibility = (WRITE_EXTERNAL_STORAGE())?View.VISIBLE:View.GONE;
+        this.DialogDownloadLayout.setVisibility(downloadVisibility);
         this.DialogAdd.show();
     }
 
@@ -274,8 +279,13 @@ public class FeedsActivity extends AppCompatActivity {
         Loading(true);
         String url = this.DialogAddUrl.getText().toString();
         DateTime lastDownload = new DateTime();
-        boolean download = this.DialogAddNew.isChecked() || this.DialogAddAll.isChecked();
-        if(this.DialogAddAll.isChecked()) lastDownload = Data.DEFAULT_DATE_TIME.minusYears(1);
+        boolean download = false;
+        if(this.DialogDownloadLayout.getVisibility() == View.VISIBLE)
+        {
+            download = this.DialogAddNew.isChecked() || this.DialogAddAll.isChecked();
+            if(this.DialogAddAll.isChecked()) lastDownload = Data.DEFAULT_DATE_TIME.minusYears(1);
+
+        }
         Feed feed = new Feed(url, lastDownload, download);
         new AddTask(Feeds, FeedAddListener, feed).execute(feed);
     }
@@ -288,9 +298,10 @@ public class FeedsActivity extends AppCompatActivity {
     {
         this.table.removeAllViews();
         List<Feed> feeds = new LinkedList<>(Feeds.Feeds().values());
+        boolean download = WRITE_EXTERNAL_STORAGE();
         for (Feed feed : feeds)
         {
-            this.addRow(feed);
+            this.addRow(feed, download);
         }
         Loading(false);
     }
@@ -300,25 +311,21 @@ public class FeedsActivity extends AppCompatActivity {
      * Function addRow
      * for adding row.
      * @param feed Feed object that will be used for values.
-     * @return Result of the function.
+     * @param download Boolean for showing download actions.
      */
-    private void addRow(final Feed feed)
+    private void addRow(final Feed feed, boolean download)
     {
         RelativeLayout  row         = (RelativeLayout)  this.inflater.inflate(R.layout.row_feeds, null);
         TextView        rowTitle    = (TextView)        row.findViewById(R.id.ActivityFeedsRowTitle);
-        Button          rowDelete   = (Button)          row.findViewById(R.id.ActivityFeedsRowDelete);
-        CheckBox        rowDownload = (CheckBox)        row.findViewById(R.id.ActivityFeedsRowDownloadOn);
-
-        rowTitle.setText(feed.Title());
-        rowDownload.setChecked(feed.DownloadOn);
-
         rowTitle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent= new Intent(Intent.ACTION_VIEW, Uri.parse(feed.Url()));
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(feed.Url()));
                 context.startActivity(intent);
             }
         });
+        rowTitle.setText(feed.Title());
+        Button          rowDelete   = (Button)          row.findViewById(R.id.ActivityFeedsRowDelete);
         rowDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -326,18 +333,25 @@ public class FeedsActivity extends AppCompatActivity {
                 new RemoveTask(Feeds, FeedRemoveListener, feed).execute(feed);
             }
         });
-        rowDownload.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, final boolean b) {
-                Thread t = new Thread(new Runnable() {
-                    public void run() {
-                        feed.DownloadOn = b;
-                        new SaveTask(feed, FeedSaveListener, feed).execute();
-                    }
-                });
-                t.start();
-            }
-        });
+        CheckBox rowDownload = (CheckBox) row.findViewById(R.id.ActivityFeedsRowDownloadOn);
+        if(download)
+        {
+            rowDownload.setVisibility(View.VISIBLE);
+            rowDownload.setChecked(feed.DownloadOn);
+            rowDownload.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, final boolean b) {
+                    Thread t = new Thread(new Runnable() {
+                        public void run() {
+                            feed.DownloadOn = b;
+                            new SaveTask(feed, FeedSaveListener, feed).execute();
+                        }
+                    });
+                    t.start();
+                }
+            });
+        }
+        else rowDownload.setVisibility(View.GONE);
         this.table.addView(row);
     }
 

@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
@@ -60,12 +61,11 @@ public class DownloadReceiver extends BroadcastReceiver {
                     cursor.close();
                 }else Log.e(TAG, "EXTRA_DOWNLOAD_ID not found!");
             }else Log.e(TAG, "No download manager!");
-
             NotificationCompat.Builder mBuilder =
                     new NotificationCompat.Builder(context)
-                            .setContentTitle(resourceManager.String(R.string.File, title, R.string.downloaded_END))
-                            .setSmallIcon(R.drawable.ic_logo)
-                            .setContentText("");
+                            .setContentTitle(title)
+                            .setSmallIcon(R.drawable.ic_notification)
+                            .setContentText(resourceManager.String(R.string.File, title, R.string.downloaded_END));
             if(pendingIntent != null) mBuilder.setContentIntent(pendingIntent);
             NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             mNotificationManager.notify(0, mBuilder.build());

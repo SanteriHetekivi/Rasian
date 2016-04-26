@@ -4,6 +4,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Environment;
 import android.util.Log;
 import com.hetekivi.rasian.Activities.FeedsActivity;
 import com.hetekivi.rasian.Activities.MainActivity;
@@ -16,9 +17,11 @@ import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.*;
 
 import static com.hetekivi.rasian.Data.Global.*;
+import static com.hetekivi.rasian.External.Tools.DownloadDirectory;
 
 /**
  * Created by Santeri Hetekivi on 26.3.2016.
@@ -43,30 +46,39 @@ public class FeedCollection implements Rowable, Storable, Updatable, Addable, Re
         this.Feeds = new LinkedHashMap<>();
     }
 
+    public static final int    DEFAULT_DELAY_HOURS  = 24;
+    public static final int    DEFAULT_ROW_LIMIT    = 10;
+    public static final String DEFAULT_DOWNLOAD_DIR = DownloadDirectory();
+
     /**
      * Public static final keys for preferences.
      */
-    public static final String PREFERENCES_START = TAG+"_";
-    public static final String PREF_NEXT_UPDATE = PREFERENCES_START + "NextUpdate";
-    public static final String PREF_FEEDS       = PREFERENCES_START + "Feeds";
-    public static final String PREF_DELAY_HOURS = PREFERENCES_START + "DelayHours";
+    public static final String PREFERENCES_START    = TAG+"_";
+    public static final String PREF_NEXT_UPDATE     = PREFERENCES_START + "NextUpdate";
+    public static final String PREF_FEEDS           = PREFERENCES_START + "Feeds";
+    public static final String PREF_DELAY_HOURS     = PREFERENCES_START + "DelayHours";
+    public static final String PREF_DOWNLOAD_DIR    = PREFERENCES_START + "DownloadDir";
+    public static final String PREF_ROW_LIMIT       = PREFERENCES_START + "RowLimit";
 
     /**
      * Tag names for parsing.
      * Must be lowercase.
      */
-    public static final String NAME_FEED        = "feed";
-    public static final String NAME_NEXT_UPDATE = "next_update";
-    public static final String NAME_DELAY_HOURS = "delay_hours";
+    public static final String NAME_FEED            = "feed";
+    public static final String NAME_NEXT_UPDATE     = "next_update";
+    public static final String NAME_DELAY_HOURS     = "delay_hours";
+    public static final String NAME_DOWNLOAD_DIR    = "download_dir";
+    public static final String NAME_ROW_LIMIT       = "row_limit";
 
     /**
      * Classes member variables.
      */
     public DateTime             NextUpdate  = null;
     private Map<String, Feed>   Feeds       = new HashMap<>();
-    private int                 delayHours  = 24;
-
+    private int                 delayHours  = DEFAULT_DELAY_HOURS;
+    public File                 downloadDir = new File(DEFAULT_DOWNLOAD_DIR);
     public List<Data>           Rows        = new LinkedList<>();   // List to store rows.
+    public  int                 RowLimit    = DEFAULT_ROW_LIMIT;
 
     /**
      * Function Feeds
@@ -203,15 +215,14 @@ public class FeedCollection implements Rowable, Storable, Updatable, Addable, Re
                 }
                 success = rssSuccess && success;
             }
-            this.delayHours = Preference.Get(PREF_DELAY_HOURS, 24);
+            this.delayHours = Preference.Get(PREF_DELAY_HOURS, DEFAULT_DELAY_HOURS);
             if(Preference.Contains(PREF_NEXT_UPDATE))
             {
                 this.NextUpdate = new DateTime(Preference.Get(PREF_NEXT_UPDATE, ""));
             }
-            else
-            {
-                this.setAlarm(this.delayHours);
-            }
+            else this.setAlarm(this.delayHours);
+            this.downloadDir = new File(Preference.Get(PREF_DOWNLOAD_DIR, DEFAULT_DOWNLOAD_DIR));
+            this.RowLimit = Preference.Get(PREF_ROW_LIMIT, DEFAULT_ROW_LIMIT);
 
             if(this.NextUpdate.isBefore(new DateTime()))
             {
@@ -262,6 +273,9 @@ public class FeedCollection implements Rowable, Storable, Updatable, Addable, Re
             if(!Preference.Contains(PREF_DELAY_HOURS) || !Preference.Contains(PREF_NEXT_UPDATE)) setAlarm(delayHours);
             success = Preference.Set(PREF_DELAY_HOURS, delayHours) && success;
             if(this.NextUpdate != null) success = Preference.Set(PREF_NEXT_UPDATE, NextUpdate.toString()) && success;
+            success = Preference.Set(PREF_DOWNLOAD_DIR, this.downloadDir.getPath()) && success;
+            success = Preference.Set(PREF_ROW_LIMIT, this.RowLimit) && success;
+
         }
         return success;
     }
@@ -486,6 +500,9 @@ public class FeedCollection implements Rowable, Storable, Updatable, Addable, Re
         {
             jsonObject.put(NAME_NEXT_UPDATE, this.NextUpdate.toString());
             jsonObject.put(NAME_DELAY_HOURS, this.delayHours);
+            jsonObject.put(NAME_ROW_LIMIT, this.RowLimit);
+
+            jsonObject.put(NAME_DOWNLOAD_DIR, this.downloadDir.getPath());
             if(this.Feeds != null)
             {
                 JSONArray items = new JSONArray();
@@ -537,24 +554,36 @@ public class FeedCollection implements Rowable, Storable, Updatable, Addable, Re
         if(jsonObject != null) {
             try {
                 success = true;
-                this.NextUpdate = new DateTime(jsonObject.getString(NAME_NEXT_UPDATE));
-                this.delayHours = jsonObject.getInt(NAME_DELAY_HOURS);
-                JSONArray items = jsonObject.getJSONArray(NAME_FEED);
-                if (items != null) {
-                    this.Feeds = new LinkedHashMap<>();
-                    boolean feedSuccess;
-                    for (int i = 0; i < items.length(); i++) {
-                        JSONObject item = items.getJSONObject(i);
-                        if (item != null) {
-                            Feed feed = new Feed();
-                            feedSuccess = feed.fromJSON(item);
-                            if (feedSuccess) {
-                                feedSuccess = this.Feed(feed);
+
+
+                if(jsonObject.has(NAME_DELAY_HOURS))    this.delayHours     = jsonObject.getInt(NAME_DELAY_HOURS);
+                if(jsonObject.has(NAME_NEXT_UPDATE))
+                {
+                                                        this.NextUpdate     = new DateTime(jsonObject.getString(NAME_NEXT_UPDATE));
+                                                        this.resetAlarm();
+                }
+                if(jsonObject.has(NAME_DOWNLOAD_DIR))   this.downloadDir    = new File(jsonObject.getString(NAME_DOWNLOAD_DIR));
+                if(jsonObject.has(NAME_ROW_LIMIT))      this.RowLimit       = jsonObject.getInt(NAME_ROW_LIMIT);
+                if(jsonObject.has(NAME_FEED))
+                {
+                    JSONArray items = jsonObject.getJSONArray(NAME_FEED);
+                    if (items != null) {
+                        this.Feeds = new LinkedHashMap<>();
+                        boolean feedSuccess;
+                        for (int i = 0; i < items.length(); i++) {
+                            JSONObject item = items.getJSONObject(i);
+                            if (item != null) {
+                                Feed feed = new Feed();
+                                feedSuccess = feed.fromJSON(item);
+                                if (feedSuccess) {
+                                    feedSuccess = this.Feed(feed);
+                                }
+                                success = feedSuccess && success;
                             }
-                            success = feedSuccess && success;
                         }
                     }
                 }
+
             } catch (Exception e) {
                 Log.e(TAG, e.getLocalizedMessage());
                 success = false;

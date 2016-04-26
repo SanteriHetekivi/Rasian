@@ -219,22 +219,34 @@ public class Data implements Storable, Downloadable, Comparable<Data>, JSON
                 cursor.close();
                 if(!IsInDownloadManager)
                 {
-                    File file = new File("" + Uri);
-                    String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PODCASTS) + "/" + this.Parent + "/" + file.getName();
-                    file = new File(path);
-                    if (!file.exists()) {
-                        DownloadManager.Request request = new DownloadManager.Request(Uri);
-                        request.setVisibleInDownloadsUi(true);
-                        request.allowScanningByMediaScanner();
-                        request.setTitle(Title);
-                        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_PODCASTS + "/" + Parent, file.getName());
-                        long downloadID = downloadManager.enqueue(request);
-                        Log.i(TAG, "Download started! id: " + String.valueOf(downloadID));
+                    String dir = DownloadDirString() + "/" + this.Parent;
+                    File Dir = new File(dir);
+                    boolean isDir = Dir.mkdirs() || Dir.isDirectory();
+                    if(isDir)
+                    {
+                        File file = new File("" + Uri);
+                        String path = dir + "/" + file.getName();
+                        file = new File(path);
+                        if (!file.exists()) {
+                            DownloadManager.Request request = new DownloadManager.Request(Uri);
+                            request.setVisibleInDownloadsUi(true);
+                            request.allowScanningByMediaScanner();
+                            request.setTitle(Title);
+                            request.setDestinationUri(android.net.Uri.parse("file://"+path));
+                            long downloadID = downloadManager.enqueue(request);
+                            Log.i(TAG, "Download started! id: " + String.valueOf(downloadID));
 
-                    } else {
-                        Log.e(TAG, "File " + file.getName() + " exists!");
+                        } else {
+                            Log.e(TAG, "File " + file.getName() + " exists!");
+                            if (Global.hasMessages() && Global.hasResource()) {
+                                Error.Long(Resource.String(R.string.File, file.getName(), R.string.exists_END));
+                            }
+                        }
+                    }
+                    else {
+                        Log.e(TAG, "Making directory " + dir + " failed!");
                         if (Global.hasMessages() && Global.hasResource()) {
-                            Error.Long(Resource.String(R.string.File, file.getName(), R.string.exists_END));
+                            Error.Long(Resource.String(R.string.MakingDirectory, dir, R.string.failed_END));
                         }
                     }
                 }

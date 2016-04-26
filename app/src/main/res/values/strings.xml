@@ -151,4 +151,8 @@
     <string name="exists_END">exists!</string>
     <string name="is">is</string>
     <string name="GettingFileFailed">Getting file failed!</string>
+    <string name="ActivitySettingsDownloadDirTitle">Download directory:</string>
+    <string name="ActivitySettingsDownloadDir">Select</string>
+    <string name="DownloadDirectory">Download Directory</string>
+    <string name="MakingDirectory">Making directory</string>
 </resources>

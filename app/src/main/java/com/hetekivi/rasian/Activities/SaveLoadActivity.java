@@ -46,6 +46,7 @@ public class SaveLoadActivity extends AppCompatActivity implements NFC {
     private FloatingActionButton    ButtonLoad          = null;
     private FloatingActionButton    ButtonSend          = null;
     private TextView                MiddleButtonText    = null;
+    private TextView                LeftButtonText    = null;
     private Toolbar Toolbar = null;
 
     /**
@@ -155,6 +156,7 @@ public class SaveLoadActivity extends AppCompatActivity implements NFC {
         this.ButtonLoad         = (FloatingActionButton) findViewById(R.id.ActivitySaveLoadLoad);
         this.ButtonSend         = (FloatingActionButton) findViewById(R.id.ActivitySaveLoadSend);
         this.Toolbar            = (Toolbar) findViewById(R.id.ActivitySaveLoadToolbar);
+        this.LeftButtonText     = (TextView) findViewById(R.id.ActivitySaveLoadLeftButton);
         this.MiddleButtonText   = (TextView) findViewById(R.id.ActivitySaveLoadMiddleButton);
     }
 
@@ -165,16 +167,15 @@ public class SaveLoadActivity extends AppCompatActivity implements NFC {
      */
     private void UIMakeSetValues()
     {
-        if(NFCSupported(this))
-        {
-            this.ButtonSend.setVisibility(View.VISIBLE);
-            this.MiddleButtonText.setVisibility(View.VISIBLE);
-        }
-        else
-        {
-            this.ButtonSend.setVisibility(View.GONE);
-            this.MiddleButtonText.setVisibility(View.GONE);
-        }
+        int nfcVisibility = (NFCSupported(this))?View.VISIBLE:View.GONE;
+        this.ButtonSend.setVisibility(nfcVisibility);
+        this.MiddleButtonText.setVisibility(nfcVisibility);
+        int downloadVisibility = (WRITE_EXTERNAL_STORAGE())?View.VISIBLE:View.GONE;
+        this.ButtonSave.setVisibility(downloadVisibility);
+        this.LeftButtonText.setVisibility(downloadVisibility);
+        this.ButtonSend.setVisibility(downloadVisibility);
+        this.MiddleButtonText.setVisibility(downloadVisibility);
+
     }
 
     /**

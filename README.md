@@ -16,6 +16,7 @@ Features:
 * Automatic download can be turned on or off for individual feeds.
 * Settings can be saved, loaded and transferred with simple JSON file and NFC.
 * Smart feed media download with Android's own DownloadManager.
+* You can select the download directory from settings.
 * Fully localised in english and finnish.
 * App is fully ad free.
 * App is Open Source ([GitHub Project](https://github.com/SanteriHetekivi/Rasian)).
@@ -41,6 +42,7 @@ Ominaisuudet:
 * Automaattisen latauksen toi laittaa päälle tai pois yksittäisille syötteille.
 * Asetukset voi tallentaa, latadat ja lähettää yksinkertaisella JSON tiedostolla ja NFC:llä.
 * Älykäs syötteen median lataus Androidin omalla DownloadManagerilla.
+* Lataus kansion voit itse valita asetuksista.
 * Täysin lokalisoitu englanniksi ja suomeksi.
 * Sovellus on täysin mainos vapaa
 * Sovellus on avointa lähdekoodia ([GitHub Projekti](https://github.com/SanteriHetekivi/Rasian)).

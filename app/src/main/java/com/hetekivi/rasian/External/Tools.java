@@ -2,6 +2,7 @@ package com.hetekivi.rasian.External;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Environment;
 import android.webkit.MimeTypeMap;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -59,6 +60,12 @@ public class Tools {
         return uri;
     }
 
+    /**
+     * Function PathToOpenFileIntent
+     * for making File Intent from path
+     * @param path Path for file intent.
+     * @return File Intent from path or null if failed.
+     */
     public static Intent PathToOpenFileIntent(String path)
     {
         Intent intent = null;
@@ -75,6 +82,13 @@ public class Tools {
         return intent;
     }
 
-
+    /**
+     * Function for getting Download directory's path.
+     * @return Path to download directory.
+     */
+    public static String DownloadDirectory()
+    {
+        return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();
+    }
 
 }
